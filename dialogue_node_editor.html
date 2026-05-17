@@ -296,12 +296,15 @@
       <button class="tool-button" id="applyJson">Nạp từ ô JSON</button>
       <button class="tool-button" id="loadSample">Nạp mẫu intro</button>
 
+      <button class="tool-button" id="clearAutosave">Clear autosave</button>
+
       <h2>Project</h2>
       <label for="storyTitle">Tên màn</label>
       <input id="storyTitle" />
 
       <label for="startNodeId">Node bắt đầu</label>
       <select id="startNodeId"></select>
+      <p class="muted" id="autosaveStatus">Autosave local: none.</p>
 
       <h2>JSON</h2>
       <p class="muted">Bạn có thể sửa trong editor, xuất JSON, rồi thay nội dung của `intro_story.json` để game dùng luồng mới.</p>
@@ -359,6 +362,9 @@
     let story = { title: 'Untitled story', startNodeId: '', nodes: [] };
     let selectedId = null;
     let dragState = null;
+    let autosaveTimer = null;
+    let hasDraggedSinceAutosave = false;
+    const AUTOSAVE_KEY = 'dialogue-node-editor-autosave-v1';
     const sampleStory = {
       title: 'Màn 1: Dưới gầm cầu',
       startNodeId: 'help_request',
@@ -425,6 +431,7 @@
     const edges = document.getElementById('edges');
     const storyTitle = document.getElementById('storyTitle');
     const startNodeId = document.getElementById('startNodeId');
+    const autosaveStatus = document.getElementById('autosaveStatus');
     const jsonOutput = document.getElementById('jsonOutput');
     const form = document.getElementById('form');
     const emptyState = document.getElementById('emptyState');
@@ -441,6 +448,56 @@
       question: document.getElementById('nodeQuestion'),
       instruction: document.getElementById('nodeInstruction')
     };
+
+    function updateAutosaveStatus(message) {
+      autosaveStatus.textContent = message;
+    }
+
+    function persistAutosave() {
+      localStorage.setItem(AUTOSAVE_KEY, JSON.stringify({
+        story,
+        selectedId,
+        savedAt: new Date().toISOString()
+      }));
+      updateAutosaveStatus(`Autosave local: ${new Date().toLocaleTimeString()}`);
+      hasDraggedSinceAutosave = false;
+    }
+
+    function scheduleAutosave() {
+      updateAutosaveStatus('Autosave local: saving...');
+      clearTimeout(autosaveTimer);
+      autosaveTimer = setTimeout(persistAutosave, 300);
+    }
+
+    function clearAutosave() {
+      clearTimeout(autosaveTimer);
+      localStorage.removeItem(AUTOSAVE_KEY);
+      updateAutosaveStatus('Autosave local: cleared.');
+      hasDraggedSinceAutosave = false;
+    }
+
+    function restoreAutosave() {
+      const saved = localStorage.getItem(AUTOSAVE_KEY);
+      if (!saved) return false;
+
+      try {
+        const draft = JSON.parse(saved);
+        if (!draft?.story || !Array.isArray(draft.story.nodes)) {
+          throw new Error('Invalid autosave payload');
+        }
+
+        story = draft.story;
+        selectedId = draft.selectedId || draft.story.startNodeId || draft.story.nodes[0]?.id || null;
+        updateAutosaveStatus(
+          `Autosave local: restored${draft.savedAt ? ` (${new Date(draft.savedAt).toLocaleString()})` : ''}.`
+        );
+        return true;
+      } catch (error) {
+        localStorage.removeItem(AUTOSAVE_KEY);
+        updateAutosaveStatus('Autosave local: invalid draft cleared.');
+        return false;
+      }
+    }
 
     function getUniqueNodeId(type) {
       let index = 1;
@@ -706,10 +763,12 @@
       const node = story.nodes.find(item => item.id === dragState.id);
       node.x = Math.max(0, event.clientX - dragState.offsetX);
       node.y = Math.max(0, event.clientY - dragState.offsetY);
+      hasDraggedSinceAutosave = true;
       render();
     });
 
     window.addEventListener('pointerup', () => {
+      if (hasDraggedSinceAutosave) scheduleAutosave();
       dragState = null;
     });
 
@@ -729,6 +788,7 @@
       canvas.querySelectorAll('.node').forEach(node => node.classList.remove('connect-target'));
       render();
       if (selectedId) renderChoices(getSelectedNode());
+      scheduleAutosave();
     });
 
     Object.entries(fields).forEach(([key, input]) => {
@@ -755,6 +815,7 @@
         }
         dialogueFields.hidden = node.type !== 'dialogue';
         render();
+        scheduleAutosave();
       });
     });
 
@@ -770,12 +831,14 @@
         effect[effectKey] = effectKey === 'value' && effect.type === 'stat'
           ? Number(event.target.value || 0)
           : event.target.value;
+        scheduleAutosave();
         return;
       }
 
       if (!key) return;
       node.choices[index][key] = event.target.value || null;
       renderEdges();
+      scheduleAutosave();
     });
 
     choiceList.addEventListener('click', event => {
@@ -787,12 +850,14 @@
         node.choices[index].nextNodeId = null;
         renderChoices(node);
         render();
+        scheduleAutosave();
       }
 
       if (action === 'add-effect') {
         node.choices[index].effects ||= [];
         node.choices[index].effects.push({ type: 'stat', key: '', op: 'add', value: 0 });
         renderChoices(node);
+        scheduleAutosave();
       }
 
       if (action === 'delete-effect') {
@@ -800,6 +865,7 @@
         const effectIndex = Number(event.target.dataset.effectIndex);
         node.choices[choiceIndex].effects.splice(effectIndex, 1);
         renderChoices(node);
+        scheduleAutosave();
       }
     });
 
@@ -809,6 +875,7 @@
       if (!story.startNodeId) story.startNodeId = node.id;
       render();
       selectNode(node.id);
+      scheduleAutosave();
     });
 
     document.getElementById('addDialogue').addEventListener('click', () => {
@@ -817,6 +884,7 @@
       if (!story.startNodeId) story.startNodeId = node.id;
       render();
       selectNode(node.id);
+      scheduleAutosave();
     });
 
     document.getElementById('addChoice').addEventListener('click', () => {
@@ -825,6 +893,7 @@
       node.choices.push({ text: '', result: 'correct', feedback: '', afterScene: '', effects: [], nextNodeId: null });
       renderChoices(node);
       render();
+      scheduleAutosave();
     });
 
     document.getElementById('deleteNode').addEventListener('click', () => {
@@ -849,14 +918,17 @@
         form.hidden = true;
         emptyState.hidden = false;
       }
+      scheduleAutosave();
     });
 
     storyTitle.addEventListener('input', () => {
       story.title = storyTitle.value;
+      scheduleAutosave();
     });
 
     startNodeId.addEventListener('change', () => {
       story.startNodeId = startNodeId.value;
+      scheduleAutosave();
     });
 
     document.getElementById('exportJson').addEventListener('click', () => {
@@ -879,6 +951,7 @@
         selectedId = story.startNodeId || story.nodes[0]?.id || null;
         render();
         if (selectedId) selectNode(selectedId);
+        scheduleAutosave();
       } catch (error) {
         jsonOutput.value = `JSON khong hop le: ${error.message}`;
       }
@@ -894,9 +967,20 @@
       selectedId = story.startNodeId;
       render();
       selectNode(selectedId);
+      scheduleAutosave();
     });
 
+    document.getElementById('clearAutosave').addEventListener('click', () => {
+      clearAutosave();
+    });
+
+    const restored = restoreAutosave();
+    if (!restored) {
+      updateAutosaveStatus('Autosave local: none.');
+    }
+
     render();
+    if (selectedId) selectNode(selectedId);
   </script>
 </body>
 </html>

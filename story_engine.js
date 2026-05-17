@@ -20,19 +20,80 @@
   let pendingChoice = null;
   let playerState = {};
 
+  function showLoadError(message) {
+    sceneText.textContent = message;
+    responseBlock.hidden = true;
+    speechBlock.hidden = true;
+  }
+
+  function validateStory(story) {
+    if (!story || typeof story !== 'object') {
+      throw new Error('Story data must be an object.');
+    }
+
+    if (!story.startNodeId || typeof story.startNodeId !== 'string') {
+      throw new Error('Missing startNodeId.');
+    }
+
+    if (!Array.isArray(story.nodes) || story.nodes.length === 0) {
+      throw new Error('Story must include at least one node.');
+    }
+
+    const nodeIds = new Set();
+    story.nodes.forEach((node, index) => {
+      if (!node || typeof node !== 'object') {
+        throw new Error(`Node at index ${index} is invalid.`);
+      }
+
+      if (!node.id || typeof node.id !== 'string') {
+        throw new Error(`Node at index ${index} is missing an id.`);
+      }
+
+      if (nodeIds.has(node.id)) {
+        throw new Error(`Duplicate node id: ${node.id}`);
+      }
+
+      nodeIds.add(node.id);
+
+      if (!Array.isArray(node.choices)) {
+        throw new Error(`Node "${node.id}" must include a choices array.`);
+      }
+
+      node.choices.forEach((choice, choiceIndex) => {
+        if (!choice || typeof choice !== 'object') {
+          throw new Error(`Choice ${choiceIndex + 1} in node "${node.id}" is invalid.`);
+        }
+
+        if (!choice.text || typeof choice.text !== 'string') {
+          throw new Error(`Choice ${choiceIndex + 1} in node "${node.id}" is missing text.`);
+        }
+      });
+    });
+
+    if (!nodeIds.has(story.startNodeId)) {
+      throw new Error(`startNodeId "${story.startNodeId}" does not exist.`);
+    }
+
+    story.nodes.forEach(node => {
+      node.choices.forEach((choice, choiceIndex) => {
+        if (choice.nextNodeId && !nodeIds.has(choice.nextNodeId)) {
+          throw new Error(
+            `Choice ${choiceIndex + 1} in node "${node.id}" points to missing node "${choice.nextNodeId}".`
+          );
+        }
+      });
+    });
+
+    return story;
+  }
   async function loadStory() {
     try {
       if (!config.storyUrl) throw new Error('Missing storyUrl');
       const response = await fetch(config.storyUrl);
       if (!response.ok) throw new Error(`Cannot load ${config.storyUrl}`);
-      storyData = await response.json();
+      storyData = validateStory(await response.json());
     } catch (error) {
-      storyData = config.fallbackStory || null;
-    }
-
-    if (!storyData) {
-      sceneText.textContent = 'Không thể tải dữ liệu màn chơi.';
-      responseBlock.hidden = true;
+      showLoadError(`Không thể tải dữ liệu màn chơi. ${error.message}`);
       return;
     }
 
