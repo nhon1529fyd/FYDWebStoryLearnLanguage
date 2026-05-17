@@ -296,6 +296,8 @@
       <button class="tool-button" id="applyJson">Nạp từ ô JSON</button>
       <button class="tool-button" id="loadSample">Nạp mẫu intro</button>
 
+      <button class="tool-button" id="openJsonFile">Open JSON file</button>
+      <button class="tool-button" id="saveJsonFile">Save to opened file</button>
       <button class="tool-button" id="clearAutosave">Clear autosave</button>
 
       <h2>Project</h2>
@@ -304,6 +306,7 @@
 
       <label for="startNodeId">Node bắt đầu</label>
       <select id="startNodeId"></select>
+      <p class="muted" id="fileStatus">File save: no file opened.</p>
       <p class="muted" id="autosaveStatus">Autosave local: none.</p>
 
       <h2>JSON</h2>
@@ -364,6 +367,7 @@
     let dragState = null;
     let autosaveTimer = null;
     let hasDraggedSinceAutosave = false;
+    let fileHandle = null;
     const AUTOSAVE_KEY = 'dialogue-node-editor-autosave-v1';
     const sampleStory = {
       title: 'Màn 1: Dưới gầm cầu',
@@ -431,6 +435,7 @@
     const edges = document.getElementById('edges');
     const storyTitle = document.getElementById('storyTitle');
     const startNodeId = document.getElementById('startNodeId');
+    const fileStatus = document.getElementById('fileStatus');
     const autosaveStatus = document.getElementById('autosaveStatus');
     const jsonOutput = document.getElementById('jsonOutput');
     const form = document.getElementById('form');
@@ -451,6 +456,10 @@
 
     function updateAutosaveStatus(message) {
       autosaveStatus.textContent = message;
+    }
+
+    function updateFileStatus(message) {
+      fileStatus.textContent = message;
     }
 
     function persistAutosave() {
@@ -496,6 +505,60 @@
         localStorage.removeItem(AUTOSAVE_KEY);
         updateAutosaveStatus('Autosave local: invalid draft cleared.');
         return false;
+      }
+    }
+
+    async function openJsonFile() {
+      if (!window.showOpenFilePicker) {
+        updateFileStatus('File save: browser does not support local file access.');
+        return;
+      }
+
+      try {
+        const [handle] = await window.showOpenFilePicker({
+          multiple: false,
+          types: [
+            {
+              description: 'JSON Files',
+              accept: { 'application/json': ['.json'] }
+            }
+          ]
+        });
+
+        if (!handle) return;
+
+        const file = await handle.getFile();
+        const parsed = JSON.parse(await file.text());
+        if (!parsed || !Array.isArray(parsed.nodes)) {
+          throw new Error('Selected JSON is missing a nodes array.');
+        }
+
+        fileHandle = handle;
+        story = parsed;
+        selectedId = story.startNodeId || story.nodes[0]?.id || null;
+        render();
+        if (selectedId) selectNode(selectedId);
+        updateFileStatus(`File save: opened ${file.name}.`);
+        scheduleAutosave();
+      } catch (error) {
+        if (error.name === 'AbortError') return;
+        updateFileStatus(`File save: open failed. ${error.message}`);
+      }
+    }
+
+    async function saveToOpenedFile() {
+      if (!fileHandle) {
+        updateFileStatus('File save: open a JSON file first.');
+        return;
+      }
+
+      try {
+        const writable = await fileHandle.createWritable();
+        await writable.write(JSON.stringify(story, null, 2));
+        await writable.close();
+        updateFileStatus(`File save: saved at ${new Date().toLocaleTimeString()}.`);
+      } catch (error) {
+        updateFileStatus(`File save: save failed. ${error.message}`);
       }
     }
 
@@ -945,6 +1008,14 @@
       URL.revokeObjectURL(url);
     });
 
+    document.getElementById('openJsonFile').addEventListener('click', async () => {
+      await openJsonFile();
+    });
+
+    document.getElementById('saveJsonFile').addEventListener('click', async () => {
+      await saveToOpenedFile();
+    });
+
     document.getElementById('applyJson').addEventListener('click', () => {
       try {
         story = JSON.parse(jsonOutput.value);
@@ -978,6 +1049,11 @@
     if (!restored) {
       updateAutosaveStatus('Autosave local: none.');
     }
+    updateFileStatus(
+      window.showOpenFilePicker
+        ? 'File save: no file opened.'
+        : 'File save: browser does not support local file access.'
+    );
 
     render();
     if (selectedId) selectNode(selectedId);

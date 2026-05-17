@@ -462,8 +462,13 @@
   </div>
 
   <script>
+    const storyParam = new URLSearchParams(window.location.search).get('story');
+    const storyUrl = storyParam && /^[a-zA-Z0-9._-]+\.json$/.test(storyParam)
+      ? storyParam
+      : 'intro_story.json';
+
     window.STORY_CONFIG = {
-      storyUrl: 'intro_story.json'
+      storyUrl
     };
   </script>
   <script src="story_engine.js"></script>
