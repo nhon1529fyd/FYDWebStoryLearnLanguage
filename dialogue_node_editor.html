@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dialogue Node Editor</title>
+  <style>
+    :root {
+      --bg: #0b0f18;
+      --panel: #121826;
+      --panel-2: #171f30;
+      --text: #f7f3e8;
+      --muted: #b9bfd0;
+      --gold: #ffd56a;
+      --cyan: #7ee7ff;
+      --rose: #ff8fb8;
+      --line: rgba(255,255,255,0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .app {
+      height: 100vh;
+      display: grid;
+      grid-template-columns: 240px 1fr 360px;
+    }
+
+    .sidebar,
+    .inspector {
+      background: var(--panel);
+      border-right: 1px solid var(--line);
+      padding: 18px;
+      overflow: auto;
+    }
+
+    .inspector {
+      border-right: 0;
+      border-left: 1px solid var(--line);
+    }
+
+    h1 {
+      font-size: 20px;
+      margin: 0 0 18px;
+    }
+
+    h2 {
+      font-size: 15px;
+      margin: 22px 0 10px;
+      color: var(--cyan);
+    }
+
+    .tool-button,
+    .small-button,
+    .danger-button {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 11px 12px;
+      cursor: pointer;
+      text-align: left;
+      margin-bottom: 10px;
+    }
+
+    .tool-button:hover,
+    .small-button:hover,
+    .danger-button:hover {
+      border-color: rgba(126,231,255,0.48);
+    }
+
+    .danger-button {
+      width: 100%;
+      border: 1px solid rgba(255,143,184,0.34);
+      background: rgba(255,143,184,0.1);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 11px 12px;
+      cursor: pointer;
+      text-align: left;
+      margin-top: 14px;
+    }
+
+    .canvas-wrap {
+      position: relative;
+      overflow: auto;
+      background:
+        linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
+
+    .canvas {
+      position: relative;
+      width: 1800px;
+      height: 1100px;
+    }
+
+    svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      pointer-events: none;
+    }
+
+    .node {
+      position: absolute;
+      width: 260px;
+      min-height: 126px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(18,24,38,0.94);
+      padding: 14px;
+      cursor: grab;
+      user-select: none;
+    }
+
+    .node.selected {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 2px rgba(255,213,106,0.12);
+    }
+
+    .node-type {
+      color: var(--cyan);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .node-title {
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .node-meta {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .node-input {
+      position: absolute;
+      left: -7px;
+      top: 56px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--cyan);
+      border: 2px solid var(--bg);
+    }
+
+    .node.connect-target {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 2px rgba(126,231,255,0.14);
+    }
+
+    .node-choices {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .node-choice {
+      position: relative;
+      min-height: 28px;
+      display: flex;
+      align-items: center;
+      padding: 6px 22px 6px 10px;
+      border-radius: 9px;
+      background: rgba(255,255,255,0.05);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .node-choice.correct {
+      border-left: 3px solid #9dffb0;
+    }
+
+    .node-choice.partial {
+      border-left: 3px solid #ffd56a;
+    }
+
+    .node-choice.wrong {
+      border-left: 3px solid #ff8fb8;
+    }
+
+    .choice-output {
+      position: absolute;
+      right: -7px;
+      top: 50%;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      transform: translateY(-50%);
+      background: currentColor;
+      border: 2px solid var(--bg);
+      cursor: crosshair;
+      pointer-events: auto;
+    }
+
+    .choice-output.correct {
+      color: #9dffb0;
+    }
+
+    .choice-output.partial {
+      color: #ffd56a;
+    }
+
+    .choice-output.wrong {
+      color: #ff8fb8;
+    }
+
+    .connection-preview {
+      stroke: rgba(126,231,255,0.82);
+      stroke-width: 2.5;
+      stroke-dasharray: 7 6;
+      fill: none;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      margin: 12px 0 6px;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--panel-2);
+      color: var(--text);
+      padding: 10px;
+      font: inherit;
+    }
+
+    textarea {
+      min-height: 74px;
+      resize: vertical;
+    }
+
+    .choice-card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      margin-top: 12px;
+      background: rgba(255,255,255,0.03);
+    }
+
+    .effect-card {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px;
+      margin-top: 10px;
+      background: rgba(126,231,255,0.04);
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .export-box {
+      min-height: 160px;
+      margin-top: 10px;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <aside class="sidebar">
+      <h1>Node Editor</h1>
+      <button class="tool-button" id="addPrompt">+ Node lựa chọn</button>
+      <button class="tool-button" id="addDialogue">+ Node thoại</button>
+      <button class="tool-button" id="exportJson">Xuất JSON</button>
+      <button class="tool-button" id="downloadJson">Tải JSON</button>
+      <button class="tool-button" id="applyJson">Nạp từ ô JSON</button>
+      <button class="tool-button" id="loadSample">Nạp mẫu intro</button>
+
+      <h2>Project</h2>
+      <label for="storyTitle">Tên màn</label>
+      <input id="storyTitle" />
+
+      <label for="startNodeId">Node bắt đầu</label>
+      <select id="startNodeId"></select>
+
+      <h2>JSON</h2>
+      <p class="muted">Bạn có thể sửa trong editor, xuất JSON, rồi thay nội dung của `intro_story.json` để game dùng luồng mới.</p>
+      <textarea class="export-box" id="jsonOutput"></textarea>
+    </aside>
+
+    <section class="canvas-wrap">
+      <div class="canvas" id="canvas">
+        <svg id="edges"></svg>
+      </div>
+    </section>
+
+    <aside class="inspector">
+      <h1>Inspector</h1>
+      <div id="emptyState" class="muted">Chọn một node để chỉnh nội dung.</div>
+      <div id="form" hidden>
+        <label for="nodeId">ID</label>
+        <input id="nodeId" />
+
+        <label for="nodeType">Loại node</label>
+        <select id="nodeType">
+          <option value="prompt">Lựa chọn</option>
+          <option value="dialogue">Thoại</option>
+        </select>
+
+        <label for="nodeTitle">Tên node</label>
+        <input id="nodeTitle" />
+
+        <label for="nodeScene">Lời dẫn</label>
+        <textarea id="nodeScene"></textarea>
+
+        <div id="dialogueFields">
+          <label for="nodeSpeaker">Người nói</label>
+          <input id="nodeSpeaker" />
+
+          <label for="nodeLine">Thoại tiếng Anh</label>
+          <textarea id="nodeLine"></textarea>
+        </div>
+
+        <label for="nodeQuestion">Câu hỏi cho người chơi</label>
+        <input id="nodeQuestion" />
+
+        <label for="nodeInstruction">Hướng dẫn</label>
+        <textarea id="nodeInstruction"></textarea>
+
+        <h2>Lựa chọn</h2>
+        <div id="choiceList"></div>
+        <button class="small-button" id="addChoice">+ Thêm lựa chọn</button>
+        <button class="danger-button" id="deleteNode">Xóa node này</button>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    let story = { title: 'Untitled story', startNodeId: '', nodes: [] };
+    let selectedId = null;
+    let dragState = null;
+    const sampleStory = {
+      title: 'Màn 1: Dưới gầm cầu',
+      startNodeId: 'help_request',
+      stateDefaults: {
+        trust: 0,
+        clarity: 0
+      },
+      visibleStats: [
+        { key: 'trust', label: 'Niềm tin' },
+        { key: 'clarity', label: 'Rõ tình trạng' }
+      ],
+      nodes: [
+        {
+          id: 'help_request',
+          type: 'prompt',
+          title: 'Người chơi cầu cứu',
+          scene: 'Tiếng mưa rơi dày đặc. Bạn tỉnh dậy dưới gầm cầu, đầu đau nhói và không nhớ mình là ai. Trong màn mưa, bạn thấy một cô gái lạ đi ngang qua. Đây có thể là cơ hội duy nhất để cầu cứu.',
+          question: 'Bạn gọi cô ấy thế nào?',
+          instruction: 'Chọn câu nhờ giúp đỡ phù hợp nhất với tình huống.',
+          x: 80,
+          y: 80,
+          choices: [
+            {
+              text: "Please help me. I don't know where I am.",
+              result: 'correct',
+              feedback: 'Đúng. Bạn đang gặp nguy hiểm và cần giúp đỡ ngay, nên đây là câu phù hợp nhất.',
+              afterScene: 'Cô gái dừng lại ngay, vội bước đến gần bạn.',
+              effects: [
+                { type: 'stat', key: 'trust', op: 'add', value: 1 },
+                { type: 'flag', key: 'asked_for_help', value: true }
+              ],
+              nextNodeId: 'girl_checks'
+            }
+          ]
+        },
+        {
+          id: 'girl_checks',
+          type: 'dialogue',
+          title: 'Cô gái hỏi',
+          scene: 'Cô gái cúi xuống, vẫn giữ khoảng cách cẩn trọng.',
+          speaker: 'Cô gái lạ',
+          line: 'Are you okay? Can you hear me?',
+          question: 'Bạn trả lời thế nào?',
+          instruction: 'Chọn câu trả lời phù hợp với câu hỏi của cô gái.',
+          x: 430,
+          y: 80,
+          choices: [
+            {
+              text: "I can hear you, but I can't remember anything.",
+              result: 'correct',
+              feedback: 'Đúng. Câu này trả lời trực tiếp cả hai ý: bạn nghe được cô ấy, nhưng đang mất trí nhớ.',
+              afterScene: 'Bạn cố ngồi dậy. Những ký ức trong đầu vẫn chỉ là khoảng trống.',
+              effects: [
+                { type: 'stat', key: 'clarity', op: 'add', value: 1 }
+              ],
+              nextNodeId: null
+            }
+          ]
+        }
+      ]
+    };
+
+    const canvas = document.getElementById('canvas');
+    const edges = document.getElementById('edges');
+    const storyTitle = document.getElementById('storyTitle');
+    const startNodeId = document.getElementById('startNodeId');
+    const jsonOutput = document.getElementById('jsonOutput');
+    const form = document.getElementById('form');
+    const emptyState = document.getElementById('emptyState');
+    const dialogueFields = document.getElementById('dialogueFields');
+    const choiceList = document.getElementById('choiceList');
+
+    const fields = {
+      id: document.getElementById('nodeId'),
+      type: document.getElementById('nodeType'),
+      title: document.getElementById('nodeTitle'),
+      scene: document.getElementById('nodeScene'),
+      speaker: document.getElementById('nodeSpeaker'),
+      line: document.getElementById('nodeLine'),
+      question: document.getElementById('nodeQuestion'),
+      instruction: document.getElementById('nodeInstruction')
+    };
+
+    function getUniqueNodeId(type) {
+      let index = 1;
+      let candidate = `${type}_${index}`;
+      while (story.nodes.some(node => node.id === candidate)) {
+        index += 1;
+        candidate = `${type}_${index}`;
+      }
+      return candidate;
+    }
+
+    function createNode(type) {
+      const index = story.nodes.length + 1;
+      return {
+        id: getUniqueNodeId(type),
+        type,
+        title: type === 'dialogue' ? 'Node thoại mới' : 'Node lựa chọn mới',
+        scene: '',
+        speaker: type === 'dialogue' ? 'Nhân vật' : '',
+        line: '',
+        question: '',
+        instruction: '',
+        x: 80 + index * 28,
+        y: 80 + index * 28,
+        choices: []
+      };
+    }
+
+    function render() {
+      canvas.querySelectorAll('.node').forEach(node => node.remove());
+      story.nodes.forEach(node => {
+        const el = document.createElement('article');
+        el.className = `node${node.id === selectedId ? ' selected' : ''}`;
+        el.style.left = `${node.x || 0}px`;
+        el.style.top = `${node.y || 0}px`;
+        el.dataset.id = node.id;
+        const choiceMarkup = node.choices.length
+          ? `
+            <div class="node-choices">
+              ${node.choices.map((choice, index) => `
+                <div class="node-choice ${choice.result || 'correct'}" data-choice-index="${index}">
+                  ${choice.text || `Lựa chọn ${index + 1}`}
+                  <span class="choice-output ${choice.result || 'correct'}" data-node-id="${node.id}" data-choice-index="${index}"></span>
+                </div>
+              `).join('')}
+            </div>
+          `
+          : '';
+
+        el.innerHTML = `
+          <span class="node-input" data-node-id="${node.id}"></span>
+          <div class="node-type">${node.type}</div>
+          <div class="node-title">${node.title || node.id}</div>
+          <div class="node-meta">${node.choices.length} lựa chọn</div>
+          ${choiceMarkup}
+        `;
+        el.addEventListener('click', () => selectNode(node.id));
+        el.addEventListener('pointerdown', startDrag);
+        canvas.appendChild(el);
+      });
+      canvas.querySelectorAll('.choice-output').forEach(output => {
+        output.addEventListener('pointerdown', startConnection);
+      });
+      renderEdges();
+      renderProjectControls();
+    }
+
+    function renderEdges() {
+      edges.innerHTML = '';
+      story.nodes.forEach(node => {
+        node.choices.forEach((choice, index) => {
+          if (!choice.nextNodeId) return;
+          const target = story.nodes.find(item => item.id === choice.nextNodeId);
+          if (!target) return;
+
+          const startX = (node.x || 0) + 260;
+          const startY = (node.y || 0) + 101 + index * 36;
+          const endX = target.x || 0;
+          const endY = (target.y || 0) + 62;
+          const midX = startX + Math.max(56, (endX - startX) / 2);
+          const color = choice.result === 'correct'
+            ? '#9dffb0'
+            : choice.result === 'partial'
+              ? '#ffd56a'
+              : '#ff8fb8';
+
+          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          path.setAttribute('d', `M ${startX} ${startY} C ${midX} ${startY}, ${midX} ${endY}, ${endX} ${endY}`);
+          path.setAttribute('stroke', color);
+          path.setAttribute('stroke-width', '2.5');
+          path.setAttribute('fill', 'none');
+          edges.appendChild(path);
+        });
+      });
+    }
+
+    function getCanvasPoint(clientX, clientY) {
+      const rect = canvas.getBoundingClientRect();
+      const wrap = canvas.parentElement;
+      return {
+        x: clientX - rect.left + wrap.scrollLeft,
+        y: clientY - rect.top + wrap.scrollTop
+      };
+    }
+
+    function renderProjectControls() {
+      storyTitle.value = story.title || '';
+      startNodeId.innerHTML = story.nodes.map(node => `<option value="${node.id}">${node.id}</option>`).join('');
+      if (story.startNodeId) startNodeId.value = story.startNodeId;
+    }
+
+    function selectNode(id) {
+      selectedId = id;
+      const node = getSelectedNode();
+      emptyState.hidden = true;
+      form.hidden = false;
+      Object.entries(fields).forEach(([key, input]) => input.value = node[key] || '');
+      dialogueFields.hidden = node.type !== 'dialogue';
+      renderChoices(node);
+      render();
+    }
+
+    function deselectNode() {
+      selectedId = null;
+      form.hidden = true;
+      emptyState.hidden = false;
+      render();
+    }
+
+    function getSelectedNode() {
+      return story.nodes.find(node => node.id === selectedId);
+    }
+
+    function renderChoices(node) {
+      choiceList.innerHTML = '';
+      node.choices.forEach((choice, index) => {
+        const card = document.createElement('div');
+        card.className = 'choice-card';
+        card.innerHTML = `
+          <label>Nội dung</label>
+          <textarea data-key="text" data-index="${index}">${choice.text || ''}</textarea>
+          <div class="row">
+            <div>
+              <label>Kết quả</label>
+              <select data-key="result" data-index="${index}">
+                <option value="correct">correct</option>
+                <option value="partial">partial</option>
+                <option value="wrong">wrong</option>
+              </select>
+            </div>
+            <div>
+              <label>Node tiếp theo</label>
+              <select data-key="nextNodeId" data-index="${index}">
+                <option value="">Kết thúc</option>
+                ${story.nodes.map(item => `<option value="${item.id}">${item.id}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+          <label>Feedback</label>
+          <textarea data-key="feedback" data-index="${index}">${choice.feedback || ''}</textarea>
+          <label>Lời dẫn sau lựa chọn</label>
+          <textarea data-key="afterScene" data-index="${index}">${choice.afterScene || ''}</textarea>
+          <label>Effects</label>
+          <div data-effects-index="${index}">
+            ${(choice.effects || []).map((effect, effectIndex) => `
+              <div class="effect-card">
+                <div class="row">
+                  <div>
+                    <label>Loại</label>
+                    <select data-effect-key="type" data-choice-index="${index}" data-effect-index="${effectIndex}">
+                      <option value="stat">stat</option>
+                      <option value="flag">flag</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label>Key</label>
+                    <input data-effect-key="key" data-choice-index="${index}" data-effect-index="${effectIndex}" value="${effect.key || ''}" />
+                  </div>
+                </div>
+                <div class="row">
+                  <div>
+                    <label>Phép</label>
+                    <select data-effect-key="op" data-choice-index="${index}" data-effect-index="${effectIndex}">
+                      <option value="add">add</option>
+                      <option value="set">set</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label>Giá trị</label>
+                    <input data-effect-key="value" data-choice-index="${index}" data-effect-index="${effectIndex}" value="${effect.value ?? ''}" />
+                  </div>
+                </div>
+                <button class="danger-button" data-action="delete-effect" data-choice-index="${index}" data-effect-index="${effectIndex}">Xóa effect</button>
+              </div>
+            `).join('')}
+          </div>
+          <button class="small-button" data-action="add-effect" data-index="${index}">+ Thêm effect</button>
+          <button class="danger-button" data-action="disconnect" data-index="${index}">Xóa kết nối</button>
+        `;
+        choiceList.appendChild(card);
+        card.querySelector('[data-key="result"]').value = choice.result || 'correct';
+        card.querySelector('[data-key="nextNodeId"]').value = choice.nextNodeId || '';
+        (choice.effects || []).forEach((effect, effectIndex) => {
+          card.querySelector(`[data-effect-key="type"][data-effect-index="${effectIndex}"]`).value = effect.type || 'stat';
+          card.querySelector(`[data-effect-key="op"][data-effect-index="${effectIndex}"]`).value = effect.op || 'add';
+        });
+      });
+    }
+
+    function startDrag(event) {
+      if (event.target.classList.contains('choice-output')) return;
+      const node = story.nodes.find(item => item.id === event.currentTarget.dataset.id);
+      dragState = {
+        id: node.id,
+        offsetX: event.clientX - node.x,
+        offsetY: event.clientY - node.y
+      };
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
+
+    canvas.addEventListener('pointerdown', event => {
+      if (event.target.closest('.node')) return;
+      deselectNode();
+    });
+
+    let connectionState = null;
+
+    function startConnection(event) {
+      event.stopPropagation();
+      const sourceNodeId = event.currentTarget.dataset.nodeId;
+      const choiceIndex = Number(event.currentTarget.dataset.choiceIndex);
+      const sourceNode = story.nodes.find(node => node.id === sourceNodeId);
+
+      connectionState = {
+        sourceNodeId,
+        choiceIndex,
+        startX: (sourceNode.x || 0) + 260,
+        startY: (sourceNode.y || 0) + 101 + choiceIndex * 36
+      };
+
+      updateConnectionPreview(event);
+    }
+
+    function updateConnectionPreview(event) {
+      renderEdges();
+      const point = getCanvasPoint(event.clientX, event.clientY);
+      const midX = connectionState.startX + Math.max(56, (point.x - connectionState.startX) / 2);
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('class', 'connection-preview');
+      path.setAttribute('d', `M ${connectionState.startX} ${connectionState.startY} C ${midX} ${connectionState.startY}, ${midX} ${point.y}, ${point.x} ${point.y}`);
+      edges.appendChild(path);
+    }
+
+    window.addEventListener('pointermove', event => {
+      if (connectionState) {
+        updateConnectionPreview(event);
+        canvas.querySelectorAll('.node').forEach(node => node.classList.remove('connect-target'));
+        const hovered = document.elementFromPoint(event.clientX, event.clientY)?.closest('.node');
+        if (hovered) hovered.classList.add('connect-target');
+        return;
+      }
+      if (!dragState) return;
+      const node = story.nodes.find(item => item.id === dragState.id);
+      node.x = Math.max(0, event.clientX - dragState.offsetX);
+      node.y = Math.max(0, event.clientY - dragState.offsetY);
+      render();
+    });
+
+    window.addEventListener('pointerup', () => {
+      dragState = null;
+    });
+
+    window.addEventListener('pointerup', event => {
+      if (!connectionState) return;
+
+      const target = document.elementFromPoint(event.clientX, event.clientY);
+      const input = target?.closest('.node-input');
+      const targetNode = target?.closest('.node');
+      const targetNodeId = input?.dataset.nodeId || targetNode?.dataset.id;
+      if (targetNodeId) {
+        const sourceNode = story.nodes.find(node => node.id === connectionState.sourceNodeId);
+        sourceNode.choices[connectionState.choiceIndex].nextNodeId = targetNodeId;
+      }
+
+      connectionState = null;
+      canvas.querySelectorAll('.node').forEach(node => node.classList.remove('connect-target'));
+      render();
+      if (selectedId) renderChoices(getSelectedNode());
+    });
+
+    Object.entries(fields).forEach(([key, input]) => {
+      input.addEventListener('input', () => {
+        const node = getSelectedNode();
+        if (!node) return;
+        const oldId = node.id;
+        if (key === 'id') {
+          const nextId = input.value.trim();
+          const duplicate = story.nodes.some(item => item.id === nextId && item.id !== oldId);
+          if (!nextId || duplicate) {
+            input.value = oldId;
+            return;
+          }
+        }
+
+        node[key] = input.value;
+        if (key === 'id') {
+          story.nodes.forEach(item => item.choices.forEach(choice => {
+            if (choice.nextNodeId === oldId) choice.nextNodeId = input.value;
+          }));
+          if (story.startNodeId === oldId) story.startNodeId = input.value;
+          selectedId = input.value;
+        }
+        dialogueFields.hidden = node.type !== 'dialogue';
+        render();
+      });
+    });
+
+    choiceList.addEventListener('input', event => {
+      const key = event.target.dataset.key;
+      const effectKey = event.target.dataset.effectKey;
+      const index = Number(event.target.dataset.index);
+      const node = getSelectedNode();
+      if (effectKey) {
+        const choiceIndex = Number(event.target.dataset.choiceIndex);
+        const effectIndex = Number(event.target.dataset.effectIndex);
+        const effect = node.choices[choiceIndex].effects[effectIndex];
+        effect[effectKey] = effectKey === 'value' && effect.type === 'stat'
+          ? Number(event.target.value || 0)
+          : event.target.value;
+        return;
+      }
+
+      if (!key) return;
+      node.choices[index][key] = event.target.value || null;
+      renderEdges();
+    });
+
+    choiceList.addEventListener('click', event => {
+      const node = getSelectedNode();
+      const action = event.target.dataset.action;
+      const index = Number(event.target.dataset.index);
+
+      if (action === 'disconnect') {
+        node.choices[index].nextNodeId = null;
+        renderChoices(node);
+        render();
+      }
+
+      if (action === 'add-effect') {
+        node.choices[index].effects ||= [];
+        node.choices[index].effects.push({ type: 'stat', key: '', op: 'add', value: 0 });
+        renderChoices(node);
+      }
+
+      if (action === 'delete-effect') {
+        const choiceIndex = Number(event.target.dataset.choiceIndex);
+        const effectIndex = Number(event.target.dataset.effectIndex);
+        node.choices[choiceIndex].effects.splice(effectIndex, 1);
+        renderChoices(node);
+      }
+    });
+
+    document.getElementById('addPrompt').addEventListener('click', () => {
+      const node = createNode('prompt');
+      story.nodes.push(node);
+      if (!story.startNodeId) story.startNodeId = node.id;
+      render();
+      selectNode(node.id);
+    });
+
+    document.getElementById('addDialogue').addEventListener('click', () => {
+      const node = createNode('dialogue');
+      story.nodes.push(node);
+      if (!story.startNodeId) story.startNodeId = node.id;
+      render();
+      selectNode(node.id);
+    });
+
+    document.getElementById('addChoice').addEventListener('click', () => {
+      const node = getSelectedNode();
+      if (!node) return;
+      node.choices.push({ text: '', result: 'correct', feedback: '', afterScene: '', effects: [], nextNodeId: null });
+      renderChoices(node);
+      render();
+    });
+
+    document.getElementById('deleteNode').addEventListener('click', () => {
+      const node = getSelectedNode();
+      if (!node) return;
+
+      story.nodes = story.nodes.filter(item => item.id !== node.id);
+      story.nodes.forEach(item => item.choices.forEach(choice => {
+        if (choice.nextNodeId === node.id) choice.nextNodeId = null;
+      }));
+
+      if (story.startNodeId === node.id) {
+        story.startNodeId = story.nodes[0]?.id || '';
+      }
+
+      selectedId = story.nodes[0]?.id || null;
+      render();
+
+      if (selectedId) {
+        selectNode(selectedId);
+      } else {
+        form.hidden = true;
+        emptyState.hidden = false;
+      }
+    });
+
+    storyTitle.addEventListener('input', () => {
+      story.title = storyTitle.value;
+    });
+
+    startNodeId.addEventListener('change', () => {
+      story.startNodeId = startNodeId.value;
+    });
+
+    document.getElementById('exportJson').addEventListener('click', () => {
+      jsonOutput.value = JSON.stringify(story, null, 2);
+    });
+
+    document.getElementById('downloadJson').addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify(story, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'story.json';
+      link.click();
+      URL.revokeObjectURL(url);
+    });
+
+    document.getElementById('applyJson').addEventListener('click', () => {
+      try {
+        story = JSON.parse(jsonOutput.value);
+        selectedId = story.startNodeId || story.nodes[0]?.id || null;
+        render();
+        if (selectedId) selectNode(selectedId);
+      } catch (error) {
+        jsonOutput.value = `JSON khong hop le: ${error.message}`;
+      }
+    });
+
+    document.getElementById('loadSample').addEventListener('click', async () => {
+      try {
+        const response = await fetch('intro_story.json');
+        story = await response.json();
+      } catch (error) {
+        story = structuredClone(sampleStory);
+      }
+      selectedId = story.startNodeId;
+      render();
+      selectNode(selectedId);
+    });
+
+    render();
+  </script>
+</body>
+</html>

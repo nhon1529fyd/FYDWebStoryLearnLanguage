@@ -1,0 +1,125 @@
+{
+  "title": "Màn 1: Dưới gầm cầu",
+  "startNodeId": "help_request",
+  "stateDefaults": {
+    "trust": 0,
+    "clarity": 0
+  },
+  "visibleStats": [
+    {
+      "key": "trust",
+      "label": "Niềm tin"
+    },
+    {
+      "key": "clarity",
+      "label": "Rõ tình trạng"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "help_request",
+      "type": "prompt",
+      "title": "Người chơi cầu cứu",
+      "scene": "Tiếng mưa rơi dày đặc. Bạn tỉnh dậy dưới gầm cầu, đầu đau nhói và không nhớ mình là ai. Trong màn mưa, bạn thấy một cô gái lạ đi ngang qua. Đây có thể là cơ hội duy nhất để cầu cứu.",
+      "question": "Bạn gọi cô ấy thế nào?",
+      "instruction": "Chọn câu nhờ giúp đỡ phù hợp nhất với tình huống.",
+      "x": 80,
+      "y": 80,
+      "choices": [
+        {
+          "text": "Please help me. I don't know where I am.",
+          "result": "correct",
+          "feedback": "Đúng. Bạn đang gặp nguy hiểm và cần giúp đỡ ngay, nên đây là câu phù hợp nhất.",
+          "afterScene": "Cô gái dừng lại ngay, vội bước đến gần bạn.",
+          "effects": [
+            {
+              "type": "stat",
+              "key": "trust",
+              "op": "add",
+              "value": 1
+            },
+            {
+              "type": "flag",
+              "key": "asked_for_help",
+              "value": true
+            }
+          ],
+          "nextNodeId": "girl_checks"
+        },
+        {
+          "text": "Could you help me with my English homework?",
+          "result": "partial",
+          "feedback": "Câu này là lời nhờ giúp đỡ đúng, nhưng sai ngữ cảnh. Bạn không cần giúp bài tập lúc này.",
+          "afterScene": "Cô gái khựng lại. Câu nói lịch sự, nhưng không khớp với tình trạng khẩn cấp của bạn.",
+          "effects": [
+            {
+              "type": "stat",
+              "key": "trust",
+              "op": "add",
+              "value": -1
+            }
+          ],
+          "nextNodeId": "girl_checks"
+        },
+        {
+          "text": "Can you help me carry these boxes?",
+          "result": "wrong",
+          "feedback": "Câu này cũng là nhờ giúp đỡ, nhưng không phù hợp với điều đang xảy ra.",
+          "afterScene": "Cô gái nhìn quanh, bối rối vì bạn không hề có chiếc hộp nào bên cạnh.",
+          "effects": [
+            {
+              "type": "stat",
+              "key": "trust",
+              "op": "add",
+              "value": -1
+            }
+          ],
+          "nextNodeId": "girl_checks"
+        }
+      ]
+    },
+    {
+      "id": "girl_checks",
+      "type": "dialogue",
+      "title": "Cô gái hỏi",
+      "scene": "Cô gái cúi xuống, vẫn giữ khoảng cách cẩn trọng.",
+      "speaker": "Cô gái lạ",
+      "line": "Are you okay? Can you hear me?",
+      "question": "Bạn trả lời thế nào?",
+      "instruction": "Chọn câu trả lời phù hợp với câu hỏi của cô gái.",
+      "x": 430,
+      "y": 80,
+      "choices": [
+        {
+          "text": "I can hear you, but I can't remember anything.",
+          "result": "correct",
+          "feedback": "Đúng. Câu này trả lời trực tiếp cả hai ý: bạn nghe được cô ấy, nhưng đang mất trí nhớ.",
+          "afterScene": "Bạn cố ngồi dậy. Những ký ức trong đầu vẫn chỉ là khoảng trống.",
+          "effects": [
+            {
+              "type": "stat",
+              "key": "clarity",
+              "op": "add",
+              "value": 1
+            }
+          ],
+          "nextNodeId": null
+        },
+        {
+          "text": "Yes, I can hear music very well.",
+          "result": "partial",
+          "feedback": "Câu này có nhắc đến việc nghe được, nhưng lệch khỏi câu hỏi và tình huống.",
+          "afterScene": "Cô gái chớp mắt, vẫn chưa hiểu rõ tình trạng của bạn.",
+          "nextNodeId": null
+        },
+        {
+          "text": "No, thank you. I already ate.",
+          "result": "wrong",
+          "feedback": "Câu này không trả lời câu hỏi cô ấy vừa hỏi.",
+          "afterScene": "Cô gái càng thêm lo lắng vì câu trả lời không liên quan.",
+          "nextNodeId": null
+        }
+      ]
+    }
+  ]
+}

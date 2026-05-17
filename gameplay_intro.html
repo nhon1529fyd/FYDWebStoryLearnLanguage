@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aetheria English Quest - Màn 1</title>
+  <style>
+    :root {
+      --bg: #080b14;
+      --panel: rgba(8, 10, 20, 0.78);
+      --panel-soft: rgba(8, 10, 20, 0.58);
+      --text: #f7f3e8;
+      --muted: #c9c2ad;
+      --gold: #ffd56a;
+      --cyan: #7ee7ff;
+      --rose: #ff8fb8;
+      --green: #9dffb0;
+      --line: rgba(255,255,255,0.16);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        linear-gradient(180deg, rgba(5, 7, 13, 0.15), rgba(5, 7, 13, 0.78)),
+        url("data:image/svg+xml,%3Csvg width='1600' height='900' viewBox='0 0 1600 900' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='sky' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop stop-color='%2317273a'/%3E%3Cstop offset='1' stop-color='%23070812'/%3E%3C/linearGradient%3E%3ClinearGradient id='water' x1='0' y1='0' x2='1' y2='0'%3E%3Cstop stop-color='%23102031'/%3E%3Cstop offset='0.5' stop-color='%23152d40'/%3E%3Cstop offset='1' stop-color='%230b1220'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1600' height='900' fill='url(%23sky)'/%3E%3Crect y='650' width='1600' height='250' fill='url(%23water)'/%3E%3Cpath d='M0 240 H1600 V355 H0 Z' fill='%23111422'/%3E%3Cpath d='M0 330 C260 310 420 380 650 350 S1180 305 1600 342 V430 H0 Z' fill='%23090d17'/%3E%3Cpath d='M120 602 C330 560 560 575 760 632 S1210 700 1490 618' stroke='%237ee7ff' stroke-width='4' fill='none' opacity='0.2'/%3E%3Cpath d='M80 704 C310 660 560 700 790 744 S1260 795 1520 732' stroke='%23ffd56a' stroke-width='3' fill='none' opacity='0.16'/%3E%3Cg fill='%23ffd56a' opacity='0.82'%3E%3Ccircle cx='190' cy='470' r='4'/%3E%3Ccircle cx='254' cy='436' r='2.8'/%3E%3Ccircle cx='1360' cy='475' r='3.6'/%3E%3Ccircle cx='1410' cy='446' r='2.4'/%3E%3C/g%3E%3C/svg%3E");
+      background-size: cover;
+      background-position: center;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(0,0,0,0.52), transparent 24%),
+        linear-gradient(90deg, rgba(0,0,0,0.42), transparent 24%, transparent 76%, rgba(0,0,0,0.38));
+      pointer-events: none;
+    }
+
+    .rain {
+      position: fixed;
+      inset: 0;
+      opacity: 0.34;
+      background-image:
+        linear-gradient(120deg, transparent 0 46%, rgba(255,255,255,0.22) 48%, transparent 50%),
+        linear-gradient(120deg, transparent 0 46%, rgba(126,231,255,0.18) 48%, transparent 50%);
+      background-size: 56px 56px, 84px 84px;
+      animation: rain-shift 1.3s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes rain-shift {
+      from { background-position: 0 0, 0 0; }
+      to { background-position: 56px 56px, 84px 84px; }
+    }
+
+    .game {
+      position: relative;
+      min-height: 100vh;
+      width: min(1240px, calc(100% - 32px));
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 290px 1fr;
+      gap: 20px;
+      align-content: end;
+      padding: 24px 0 28px;
+    }
+
+    .topbar {
+      position: absolute;
+      top: 22px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .back-link,
+    .chapter-chip {
+      border: 1px solid var(--line);
+      background: rgba(8,10,20,0.52);
+      backdrop-filter: blur(14px);
+      border-radius: 999px;
+      padding: 11px 15px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .chapter-chip {
+      color: var(--cyan);
+      font-weight: 700;
+    }
+
+    .status {
+      align-self: end;
+      margin-bottom: 196px;
+      border-radius: 22px;
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+      backdrop-filter: blur(16px);
+      padding: 18px;
+    }
+
+    .status h1 {
+      font-size: 18px;
+      margin: 0 0 14px;
+    }
+
+    .status-row {
+      padding: 11px 0;
+      color: var(--muted);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .status-row:first-of-type {
+      border-top: 0;
+    }
+
+    .status-row strong {
+      display: block;
+      color: var(--rose);
+      margin-bottom: 3px;
+    }
+
+    .status-row.dynamic strong {
+      color: var(--cyan);
+    }
+
+    .scene {
+      position: relative;
+      min-height: 700px;
+    }
+
+    .danger-signal {
+      position: absolute;
+      top: 170px;
+      left: 38%;
+      width: 112px;
+      height: 112px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 35% 30%, #fff, #ffd8e7 10%, #ff8fb8 35%, rgba(255,143,184,0.08) 70%);
+      box-shadow: 0 0 42px rgba(255,143,184,0.72), 0 0 90px rgba(255,143,184,0.22);
+      animation: float 4.8s ease-in-out infinite;
+    }
+
+    .danger-signal::after {
+      content: "!";
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: #2a1320;
+      font-size: 44px;
+      font-weight: 900;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-16px); }
+    }
+
+    .girl {
+      position: absolute;
+      right: 46px;
+      bottom: 158px;
+      width: 240px;
+      height: 470px;
+      filter: drop-shadow(0 24px 32px rgba(0,0,0,0.45));
+    }
+
+    .girl .head {
+      width: 108px;
+      height: 126px;
+      border-radius: 48% 48% 44% 44%;
+      background: linear-gradient(180deg, #ffe5bd, #d99f77);
+      margin: 0 auto;
+      position: relative;
+      z-index: 3;
+      border: 2px solid rgba(255,255,255,0.35);
+    }
+
+    .girl .hair {
+      position: absolute;
+      width: 138px;
+      height: 162px;
+      left: 51px;
+      top: -8px;
+      border-radius: 50% 50% 45% 45%;
+      background: linear-gradient(180deg, #2c1720, #0c0710);
+      z-index: 2;
+    }
+
+    .girl .eye {
+      position: absolute;
+      top: 58px;
+      width: 13px;
+      height: 18px;
+      border-radius: 50%;
+      background: #1b2438;
+    }
+
+    .girl .eye.left { left: 33px; }
+    .girl .eye.right { right: 33px; }
+
+    .girl .body {
+      width: 164px;
+      height: 248px;
+      margin: -2px auto 0;
+      border-radius: 54px 54px 34px 34px;
+      background: linear-gradient(180deg, #fff6d8, #78dfff 48%, #26466b);
+      border: 2px solid rgba(255,255,255,0.35);
+      position: relative;
+      z-index: 1;
+    }
+
+    .girl .coat {
+      position: absolute;
+      left: 22px;
+      top: 128px;
+      width: 194px;
+      height: 306px;
+      border-radius: 70px 70px 24px 24px;
+      background: linear-gradient(180deg, rgba(255,143,184,0.86), rgba(37,42,76,0.92));
+      transform: skewX(-4deg);
+    }
+
+    .dialogue {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: 24px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      backdrop-filter: blur(18px);
+      padding: 22px;
+    }
+
+    .speaker {
+      color: var(--gold);
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .dialogue p {
+      margin: 0;
+      line-height: 1.7;
+      max-width: 760px;
+    }
+
+    .story-text {
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .speech-block,
+    .response-block {
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 16px;
+      margin-top: 16px;
+    }
+
+    .speech-block[hidden] {
+      display: none;
+    }
+
+    .response-title {
+      color: var(--cyan);
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .choices {
+      display: grid;
+      gap: 10px;
+    }
+
+    .choice {
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 16px;
+      background: rgba(255,255,255,0.08);
+      color: var(--text);
+      padding: 14px 16px;
+      text-align: left;
+      cursor: pointer;
+      font: inherit;
+      transition: transform .18s ease, border-color .18s ease, background .18s ease;
+    }
+
+    .choice:hover {
+      transform: translateY(-1px);
+      border-color: rgba(126,231,255,0.52);
+      background: rgba(126,231,255,0.12);
+    }
+
+    .choice.correct {
+      border-color: rgba(157,255,176,0.7);
+      background: rgba(157,255,176,0.12);
+    }
+
+    .choice.wrong {
+      border-color: rgba(255,143,184,0.7);
+      background: rgba(255,143,184,0.12);
+    }
+
+    .feedback {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .result-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(4, 6, 12, 0.62);
+      backdrop-filter: blur(8px);
+    }
+
+    .result-modal[hidden] {
+      display: none;
+    }
+
+    .result-card {
+      width: min(440px, 100%);
+      border-radius: 22px;
+      border: 1px solid var(--line);
+      background: rgba(8,10,20,0.94);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.44);
+      padding: 22px;
+    }
+
+    .result-label {
+      color: var(--cyan);
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .result-card p {
+      margin: 0;
+      line-height: 1.6;
+      color: var(--text);
+    }
+
+    .ok-button {
+      margin-top: 18px;
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      background: linear-gradient(135deg, var(--gold), #fff0a3);
+      color: #111321;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    @media (max-width: 860px) {
+      .game {
+        grid-template-columns: 1fr;
+        align-content: stretch;
+        padding-top: 88px;
+      }
+
+      .status {
+        margin-bottom: 0;
+      }
+
+      .scene {
+        min-height: 650px;
+      }
+
+      .girl {
+        right: 8px;
+        opacity: 0.38;
+      }
+
+      .danger-signal {
+        left: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="rain"></div>
+
+  <main class="game">
+    <div class="topbar">
+      <a class="back-link" href="aetheria_english_quest_homepage.html">Quay lại homepage</a>
+      <div class="chapter-chip">Màn 1 / Dưới gầm cầu</div>
+    </div>
+
+    <aside class="status">
+      <h1>Tình trạng hiện tại</h1>
+      <div class="status-row">
+        <strong>Ký ức</strong>
+        Trống rỗng
+      </div>
+      <div class="status-row">
+        <strong>Nguy hiểm</strong>
+        Có người đang truy tìm bạn
+      </div>
+      <div class="status-row">
+        <strong>Mục tiêu</strong>
+        Trả lời để nhận được sự giúp đỡ
+      </div>
+      <div id="dynamicStats"></div>
+    </aside>
+
+    <section class="scene">
+      <div class="danger-signal"></div>
+
+      <div class="girl">
+        <div class="coat"></div>
+        <div class="hair"></div>
+        <div class="head">
+          <span class="eye left"></span>
+          <span class="eye right"></span>
+        </div>
+        <div class="body"></div>
+      </div>
+
+      <div class="dialogue">
+        <p class="story-text" id="sceneText"></p>
+        <div class="speech-block" id="speechBlock" hidden>
+          <div class="speaker" id="speakerText"></div>
+          <p id="lineText"></p>
+        </div>
+        <div class="response-block" id="responseBlock">
+          <div class="response-title" id="questionText"></div>
+          <div class="choices" id="choicesList" aria-label="Chọn câu trả lời bằng tiếng Anh"></div>
+          <div class="feedback" id="instructionText"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="result-modal" id="resultModal" hidden>
+    <div class="result-card">
+      <div class="result-label" id="resultLabel">Kết quả</div>
+      <p id="resultText"></p>
+      <button class="ok-button" id="okButton">OK</button>
+    </div>
+  </div>
+
+  <script>
+    window.STORY_CONFIG = {
+      storyUrl: 'intro_story.json',
+      fallbackStory: {
+      title: 'Màn 1: Dưới gầm cầu',
+      startNodeId: 'help_request',
+      stateDefaults: {
+        trust: 0,
+        clarity: 0
+      },
+      visibleStats: [
+        { key: 'trust', label: 'Niềm tin' },
+        { key: 'clarity', label: 'Rõ tình trạng' }
+      ],
+      nodes: [
+        {
+          id: 'help_request',
+          type: 'prompt',
+          title: 'Người chơi cầu cứu',
+          scene: 'Tiếng mưa rơi dày đặc. Bạn tỉnh dậy dưới gầm cầu, đầu đau nhói và không nhớ mình là ai. Trong màn mưa, bạn thấy một cô gái lạ đi ngang qua. Đây có thể là cơ hội duy nhất để cầu cứu.',
+          question: 'Bạn gọi cô ấy thế nào?',
+          instruction: 'Chọn câu nhờ giúp đỡ phù hợp nhất với tình huống.',
+          choices: [
+            {
+              text: "Please help me. I don't know where I am.",
+              result: 'correct',
+              feedback: 'Đúng. Bạn đang gặp nguy hiểm và cần giúp đỡ ngay, nên đây là câu phù hợp nhất.',
+              afterScene: 'Cô gái dừng lại ngay, vội bước đến gần bạn.',
+              effects: [
+                { type: 'stat', key: 'trust', op: 'add', value: 1 },
+                { type: 'flag', key: 'asked_for_help', value: true }
+              ],
+              nextNodeId: 'girl_checks'
+            },
+            {
+              text: 'Could you help me with my English homework?',
+              result: 'partial',
+              feedback: 'Câu này là lời nhờ giúp đỡ đúng, nhưng sai ngữ cảnh. Bạn không cần giúp bài tập lúc này.',
+              afterScene: 'Cô gái khựng lại. Câu nói lịch sự, nhưng không khớp với tình trạng khẩn cấp của bạn.',
+              effects: [
+                { type: 'stat', key: 'trust', op: 'add', value: -1 }
+              ],
+              nextNodeId: 'girl_checks'
+            },
+            {
+              text: 'Can you help me carry these boxes?',
+              result: 'wrong',
+              feedback: 'Câu này cũng là nhờ giúp đỡ, nhưng không phù hợp với điều đang xảy ra.',
+              afterScene: 'Cô gái nhìn quanh, bối rối vì bạn không hề có chiếc hộp nào bên cạnh.',
+              effects: [
+                { type: 'stat', key: 'trust', op: 'add', value: -1 }
+              ],
+              nextNodeId: 'girl_checks'
+            }
+          ]
+        },
+        {
+          id: 'girl_checks',
+          type: 'dialogue',
+          title: 'Cô gái hỏi',
+          scene: 'Cô gái cúi xuống, vẫn giữ khoảng cách cẩn trọng.',
+          speaker: 'Cô gái lạ',
+          line: 'Are you okay? Can you hear me?',
+          question: 'Bạn trả lời thế nào?',
+          instruction: 'Chọn câu trả lời phù hợp với câu hỏi của cô gái.',
+          choices: [
+            {
+              text: "I can hear you, but I can't remember anything.",
+              result: 'correct',
+              feedback: 'Đúng. Câu này trả lời trực tiếp cả hai ý: bạn nghe được cô ấy, nhưng đang mất trí nhớ.',
+              afterScene: 'Bạn cố ngồi dậy. Những ký ức trong đầu vẫn chỉ là khoảng trống.',
+              effects: [
+                { type: 'stat', key: 'clarity', op: 'add', value: 1 }
+              ],
+              nextNodeId: null
+            },
+            {
+              text: 'Yes, I can hear music very well.',
+              result: 'partial',
+              feedback: 'Câu này có nhắc đến việc nghe được, nhưng lệch khỏi câu hỏi và tình huống.',
+              afterScene: 'Cô gái chớp mắt, vẫn chưa hiểu rõ tình trạng của bạn.',
+              nextNodeId: null
+            },
+            {
+              text: 'No, thank you. I already ate.',
+              result: 'wrong',
+              feedback: 'Câu này không trả lời câu hỏi cô ấy vừa hỏi.',
+              afterScene: 'Cô gái càng thêm lo lắng vì câu trả lời không liên quan.',
+              nextNodeId: null
+            }
+          ]
+        }
+      ]
+      }
+    };
+  </script>
+  <script src="story_engine.js"></script>
+</body>
+</html>
