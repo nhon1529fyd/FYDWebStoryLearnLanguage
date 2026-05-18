@@ -139,6 +139,53 @@
       color: var(--cyan);
     }
 
+    .save-panel {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .save-status {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
+    .save-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .save-action {
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      color: var(--text);
+      padding: 10px 14px;
+      cursor: pointer;
+      font: inherit;
+      transition: border-color .18s ease, background .18s ease, transform .18s ease;
+    }
+
+    .save-action:hover {
+      transform: translateY(-1px);
+      border-color: rgba(126,231,255,0.52);
+      background: rgba(126,231,255,0.12);
+    }
+
+    .save-action.primary {
+      border-color: rgba(255,213,106,0.48);
+      background: rgba(255,213,106,0.12);
+      color: var(--gold);
+      font-weight: 700;
+    }
+
+    .save-action[hidden] {
+      display: none;
+    }
+
     .scene {
       position: relative;
       min-height: 700px;
@@ -423,6 +470,13 @@
         Trả lời để nhận được sự giúp đỡ
       </div>
       <div id="dynamicStats"></div>
+      <div class="save-panel">
+        <div class="save-status" id="saveStatusText">Dang kiem tra tien do luu...</div>
+        <div class="save-actions">
+          <button class="save-action primary" id="continueButton" hidden>Tiep tuc lan truoc</button>
+          <button class="save-action" id="restartButton">Choi lai tu dau</button>
+        </div>
+      </div>
     </aside>
 
     <section class="scene">
@@ -461,6 +515,8 @@
     </div>
   </div>
 
+  <script src="firebase-config.js"></script>
+  <script type="module" src="firebase-client.js"></script>
   <script>
     const storyParam = new URLSearchParams(window.location.search).get('story');
     const storyUrl = storyParam && /^[a-zA-Z0-9._-]+\.json$/.test(storyParam)
@@ -468,7 +524,8 @@
       : 'intro_story.json';
 
     window.STORY_CONFIG = {
-      storyUrl
+      storyUrl,
+      storyId: storyUrl.replace(/\.json$/i, '')
     };
   </script>
   <script src="story_engine.js"></script>

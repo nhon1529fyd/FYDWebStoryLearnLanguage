@@ -1,5 +1,6 @@
 (function () {
   const config = window.STORY_CONFIG || {};
+  const storyId = config.storyId || 'default-story';
 
   const sceneText = document.getElementById('sceneText');
   const speechBlock = document.getElementById('speechBlock');
@@ -14,11 +15,87 @@
   const resultText = document.getElementById('resultText');
   const okButton = document.getElementById('okButton');
   const dynamicStats = document.getElementById('dynamicStats');
+  const saveStatusText = document.getElementById('saveStatusText');
+  const continueButton = document.getElementById('continueButton');
+  const restartButton = document.getElementById('restartButton');
 
   let storyData = null;
   let currentNode = null;
   let pendingChoice = null;
   let playerState = {};
+  let firebaseClient = null;
+  let savedProgress = null;
+
+  function updateSaveStatus(message) {
+    if (saveStatusText) {
+      saveStatusText.textContent = message;
+    }
+  }
+
+  async function getFirebaseClient() {
+    if (firebaseClient) return firebaseClient;
+
+    if (!window.FYDFirebase || !window.FYDFirebase.ready) {
+      return null;
+    }
+
+    firebaseClient = await window.FYDFirebase.ready;
+    if (!firebaseClient || !firebaseClient.enabled) {
+      updateSaveStatus('Dang choi che do local. Chua ket noi Firebase progress.');
+    }
+    return firebaseClient;
+  }
+
+  async function fetchSavedProgress() {
+    const client = await getFirebaseClient();
+    if (!client || !client.enabled) return null;
+
+    savedProgress = await client.loadPlayerProgress(storyId);
+    return savedProgress;
+  }
+
+  function applySavedProgress() {
+    if (!savedProgress) return false;
+
+    playerState = {
+      ...playerState,
+      ...(savedProgress.playerState || {})
+    };
+
+    if (savedProgress.currentNodeId) {
+      currentNode = getNode(savedProgress.currentNodeId) || currentNode;
+    }
+
+    return true;
+  }
+
+  async function persistProgress() {
+    const client = await getFirebaseClient();
+    if (!client || !client.enabled || !currentNode) return;
+
+    try {
+      updateSaveStatus('Dang luu tien do...');
+      await client.savePlayerProgress(storyId, {
+        storyId,
+        storyUrl: config.storyUrl || '',
+        currentNodeId: currentNode.id,
+        playerState
+      });
+      savedProgress = {
+        storyId,
+        storyUrl: config.storyUrl || '',
+        currentNodeId: currentNode.id,
+        playerState: structuredClone(playerState)
+      };
+      if (continueButton) {
+        continueButton.hidden = false;
+      }
+      updateSaveStatus('Da luu tien do len Firebase.');
+    } catch (error) {
+      updateSaveStatus('Luu tien do that bai. Van co the choi tiep.');
+      console.error('Cannot save progress to Firebase:', error);
+    }
+  }
 
   function showLoadError(message) {
     sceneText.textContent = message;
@@ -98,9 +175,21 @@
     }
 
     playerState = structuredClone(storyData.stateDefaults || {});
-    renderStats();
     currentNode = getNode(storyData.startNodeId);
+    renderStats();
     renderNode(currentNode);
+
+    const existingProgress = await fetchSavedProgress();
+    if (existingProgress && existingProgress.currentNodeId) {
+      if (continueButton) {
+        continueButton.hidden = false;
+      }
+      updateSaveStatus('Tim thay tien do cu. Ban co the tiep tuc hoac choi lai tu dau.');
+      return;
+    }
+
+    updateSaveStatus('Chua co tien do cu. Bat dau tu dau.');
+    await persistProgress();
   }
 
   function getNode(id) {
@@ -193,7 +282,34 @@
     } else {
       responseBlock.hidden = true;
     }
+
+    void persistProgress();
   });
+
+  if (continueButton) {
+    continueButton.addEventListener('click', () => {
+      if (!savedProgress) return;
+
+      playerState = structuredClone(storyData.stateDefaults || {});
+      currentNode = getNode(storyData.startNodeId);
+      applySavedProgress();
+      renderStats();
+      renderNode(currentNode);
+      updateSaveStatus('Da phuc hoi tien do da luu.');
+    });
+  }
+
+  if (restartButton) {
+    restartButton.addEventListener('click', () => {
+      pendingChoice = null;
+      playerState = structuredClone(storyData.stateDefaults || {});
+      currentNode = getNode(storyData.startNodeId);
+      renderStats();
+      renderNode(currentNode);
+      updateSaveStatus('Da reset ve dau truyen. Dang cap nhat luu moi...');
+      void persistProgress();
+    });
+  }
 
   window.StoryEngine = {
     getState: () => structuredClone(playerState),
