@@ -3,7 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#07111f" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Aetheria" />
   <title>Aetheria English Quest - Màn 1</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared-shell.css">
   <style>
     :root {
       --bg: #080b14;
@@ -75,14 +86,7 @@
     }
 
     .topbar {
-      position: absolute;
-      top: 22px;
-      left: 0;
-      right: 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
+      display: none;
     }
 
     .back-link,
@@ -409,6 +413,13 @@
       color: var(--text);
     }
 
+    .modal-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
     .ok-button {
       margin-top: 18px;
       border: 0;
@@ -418,6 +429,105 @@
       color: #111321;
       font-weight: 800;
       cursor: pointer;
+    }
+
+    .secondary-button {
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 999px;
+      padding: 12px 18px;
+      background: rgba(255,255,255,0.08);
+      color: var(--text);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .auth-modal-card {
+      width: min(520px, 100%);
+      border-radius: 22px;
+      border: 1px solid var(--line);
+      background: rgba(8,10,20,0.96);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.44);
+      padding: 22px;
+    }
+
+    .auth-modal-card h3 {
+      margin: 0 0 10px;
+      font-size: 28px;
+      line-height: 1.1;
+    }
+
+    .auth-modal-card p {
+      margin: 0 0 16px;
+      line-height: 1.6;
+      color: var(--muted);
+    }
+
+    .auth-tabs {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .auth-tab {
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      padding: 10px 14px;
+      min-height: 44px;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .auth-tab.active {
+      border-color: rgba(255,213,106,0.5);
+      background: rgba(255,213,106,0.14);
+      color: var(--gold);
+      font-weight: 800;
+    }
+
+    .auth-form {
+      display: grid;
+      gap: 12px;
+    }
+
+    .auth-form[hidden] {
+      display: none;
+    }
+
+    .auth-field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .auth-field label {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .auth-field input {
+      width: 100%;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      padding: 13px 14px;
+      font: inherit;
+      outline: none;
+    }
+
+    .auth-field input:focus {
+      border-color: rgba(126,231,255,0.48);
+      box-shadow: 0 0 0 3px rgba(126,231,255,0.12);
+    }
+
+    .auth-feedback {
+      min-height: 22px;
+      margin-top: 12px;
+      color: var(--cyan);
+      line-height: 1.5;
+      font-size: 14px;
     }
 
     @media (max-width: 860px) {
@@ -448,6 +558,7 @@
 </head>
 <body>
   <div class="rain"></div>
+  <div id="appShell"></div>
 
   <main class="game">
     <div class="topbar">
@@ -511,10 +622,77 @@
     <div class="result-card">
       <div class="result-label" id="resultLabel">Kết quả</div>
       <p id="resultText"></p>
-      <button class="ok-button" id="okButton">OK</button>
+      <div class="modal-actions">
+        <button class="ok-button" id="okButton">OK</button>
+      </div>
     </div>
   </div>
 
+  <div class="result-modal" id="demoCompleteModal" hidden>
+    <div class="result-card">
+      <div class="result-label">Hoàn thành màn chơi thử</div>
+      <p>Bạn đã đi hết phần demo đầu tiên. Đăng nhập hoặc tạo tài khoản để lưu tiến độ và tiếp tục khi các chương tiếp theo được mở khóa.</p>
+      <div class="modal-actions">
+        <button class="ok-button" id="openProgressAuthButton">Tiếp tục và lưu tiến độ</button>
+        <button class="secondary-button" id="closeDemoCompleteButton">Để sau</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="result-modal" id="progressAuthModal" hidden>
+    <div class="auth-modal-card">
+      <div class="result-label">Lưu tiến độ</div>
+      <h3>Đăng nhập để tiếp tục hành trình</h3>
+      <p>Tài khoản sẽ giúp bạn lưu tiến trình, quay lại đúng đoạn đang chơi và mở khóa các nội dung tiếp theo sau màn thử này.</p>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="showLoginButton" type="button">Đăng nhập</button>
+        <button class="auth-tab" id="showRegisterButton" type="button">Đăng ký</button>
+      </div>
+
+      <form class="auth-form" id="loginForm">
+        <div class="auth-field">
+          <label for="loginEmail">Email</label>
+          <input id="loginEmail" name="email" type="email" autocomplete="email" required>
+        </div>
+        <div class="auth-field">
+          <label for="loginPassword">Mật khẩu</label>
+          <input id="loginPassword" name="password" type="password" autocomplete="current-password" required>
+        </div>
+        <button class="ok-button" type="submit">Đăng nhập</button>
+      </form>
+
+      <form class="auth-form" id="registerForm" hidden>
+        <div class="auth-field">
+          <label for="registerEmail">Email</label>
+          <input id="registerEmail" name="email" type="email" autocomplete="email" required>
+        </div>
+        <div class="auth-field">
+          <label for="registerPassword">Mật khẩu</label>
+          <input id="registerPassword" name="password" type="password" autocomplete="new-password" minlength="6" required>
+        </div>
+        <div class="auth-field">
+          <label for="registerConfirmPassword">Xác nhận mật khẩu</label>
+          <input id="registerConfirmPassword" name="confirmPassword" type="password" autocomplete="new-password" minlength="6" required>
+        </div>
+        <button class="ok-button" type="submit">Tạo tài khoản</button>
+      </form>
+
+      <div class="auth-feedback" id="authFeedback"></div>
+      <div class="modal-actions">
+        <button class="secondary-button" id="closeProgressAuthButton" type="button">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.PAGE_META = {
+      currentPage: "demo",
+      badge: "Màn 1 / Dưới gầm cầu"
+    };
+  </script>
+  <script src="pwa.js"></script>
+  <script src="shared-shell.js"></script>
   <script src="firebase-config.js"></script>
   <script type="module" src="firebase-client.js"></script>
   <script>
@@ -527,6 +705,482 @@
       storyUrl,
       storyId: storyUrl.replace(/\.json$/i, '')
     };
+  </script>
+  <script type="application/json" id="embeddedStoryData">
+    {
+      "title": "Màn 1: Dưới gầm cầu",
+      "startNodeId": "help_request",
+      "stateDefaults": {
+        "trust": 0,
+        "clarity": 0
+      },
+      "visibleStats": [
+        {
+          "key": "trust",
+          "label": "Niềm tin"
+        },
+        {
+          "key": "clarity",
+          "label": "Rõ tình trạng"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "help_request",
+          "type": "prompt",
+          "title": "Người chơi cầu cứu",
+          "scene": "Tiếng mưa rơi dày đặc. Bạn tỉnh dậy dưới gầm cầu, đầu đau nhói và không nhớ mình là ai. Trong màn mưa, bạn thấy một cô gái lạ đi ngang qua. Đây có thể là cơ hội duy nhất để cầu cứu.",
+          "question": "Bạn gọi cô ấy thế nào?",
+          "instruction": "Chọn câu nhờ giúp đỡ phù hợp nhất với tình huống.",
+          "x": 80,
+          "y": 80,
+          "choices": [
+            {
+              "text": "Please help me. I don't know where I am.",
+              "result": "correct",
+              "feedback": "Đúng. Bạn đang gặp nguy hiểm và cần giúp đỡ ngay, nên đây là câu phù hợp nhất.",
+              "afterScene": "Cô gái dừng lại ngay, vội bước đến gần bạn.",
+              "effects": [
+                {
+                  "type": "stat",
+                  "key": "trust",
+                  "op": "add",
+                  "value": 1
+                },
+                {
+                  "type": "flag",
+                  "key": "asked_for_help",
+                  "value": true
+                }
+              ],
+              "nextNodeId": "girl_checks"
+            },
+            {
+              "text": "Could you help me with my English homework?",
+              "result": "partial",
+              "feedback": "Câu này là lời nhờ giúp đỡ đúng, nhưng sai ngữ cảnh. Bạn không cần giúp bài tập lúc này.",
+              "afterScene": "Cô gái khựng lại. Câu nói lịch sự, nhưng không khớp với tình trạng khẩn cấp của bạn.",
+              "effects": [
+                {
+                  "type": "stat",
+                  "key": "trust",
+                  "op": "add",
+                  "value": -1
+                }
+              ],
+              "nextNodeId": "girl_checks"
+            },
+            {
+              "text": "Can you help me carry these boxes?",
+              "result": "wrong",
+              "feedback": "Câu này cũng là nhờ giúp đỡ, nhưng không phù hợp với điều đang xảy ra.",
+              "afterScene": "Cô gái nhìn quanh, bối rối vì bạn không hề có chiếc hộp nào bên cạnh.",
+              "effects": [
+                {
+                  "type": "stat",
+                  "key": "trust",
+                  "op": "add",
+                  "value": -1
+                }
+              ],
+              "nextNodeId": "girl_checks"
+            }
+          ]
+        },
+        {
+          "id": "girl_checks",
+          "type": "dialogue",
+          "title": "Cô gái hỏi",
+          "scene": "Cô gái cúi xuống, vẫn giữ khoảng cách cẩn trọng.",
+          "speaker": "Cô gái lạ",
+          "line": "Are you okay? Can you hear me?",
+          "question": "Bạn trả lời thế nào?",
+          "instruction": "Chọn câu trả lời phù hợp với câu hỏi của cô gái.",
+          "x": 430,
+          "y": 80,
+          "choices": [
+            {
+              "text": "I can hear you, but I can't remember anything.",
+              "result": "correct",
+              "feedback": "Đúng. Câu này trả lời trực tiếp cả hai ý: bạn nghe được cô ấy, nhưng đang mất trí nhớ.",
+              "afterScene": "Bạn cố ngồi dậy. Những ký ức trong đầu vẫn chỉ là khoảng trống.",
+              "effects": [
+                {
+                  "type": "stat",
+                  "key": "clarity",
+                  "op": "add",
+                  "value": 1
+                }
+              ],
+              "nextNodeId": null
+            },
+            {
+              "text": "Yes, I can hear music very well.",
+              "result": "partial",
+              "feedback": "Câu này có nhắc đến việc nghe được, nhưng lệch khỏi câu hỏi và tình huống.",
+              "afterScene": "Cô gái chớp mắt, vẫn chưa hiểu rõ tình trạng của bạn.",
+              "nextNodeId": null
+            },
+            {
+              "text": "No, thank you. I already ate.",
+              "result": "wrong",
+              "feedback": "Câu này không trả lời câu hỏi cô ấy vừa hỏi.",
+              "afterScene": "Cô gái càng thêm lo lắng vì câu trả lời không liên quan.",
+              "nextNodeId": null
+            }
+          ]
+        }
+      ]
+    }
+  </script>
+  <script>
+    const demoCompleteModal = document.getElementById("demoCompleteModal");
+    const progressAuthModal = document.getElementById("progressAuthModal");
+    const openProgressAuthButton = document.getElementById("openProgressAuthButton");
+    const closeDemoCompleteButton = document.getElementById("closeDemoCompleteButton");
+    const closeProgressAuthButton = document.getElementById("closeProgressAuthButton");
+    const showLoginButton = document.getElementById("showLoginButton");
+    const showRegisterButton = document.getElementById("showRegisterButton");
+    const loginForm = document.getElementById("loginForm");
+    const registerForm = document.getElementById("registerForm");
+    const registerConfirmPassword = document.getElementById("registerConfirmPassword");
+    const authFeedback = document.getElementById("authFeedback");
+    let gameplayAuthClient = null;
+
+    function setAuthMode(mode) {
+      const isLogin = mode === "login";
+      loginForm.hidden = !isLogin;
+      registerForm.hidden = isLogin;
+      showLoginButton.classList.toggle("active", isLogin);
+      showRegisterButton.classList.toggle("active", !isLogin);
+      authFeedback.textContent = "";
+    }
+
+    function openDemoCompleteModal() {
+      demoCompleteModal.hidden = false;
+    }
+
+    function closeDemoCompleteModal() {
+      demoCompleteModal.hidden = true;
+    }
+
+    function openProgressAuthModal(mode = "login") {
+      setAuthMode(mode);
+      closeDemoCompleteModal();
+      if (window.AppShell) {
+        window.AppShell.closeMobileMenu();
+      }
+      progressAuthModal.hidden = false;
+    }
+
+    function closeProgressAuthModal() {
+      progressAuthModal.hidden = true;
+      authFeedback.textContent = "";
+    }
+
+    function normalizeAuthError(error) {
+      if (!error || !error.code) {
+        return "Có lỗi xảy ra. Vui lòng thử lại.";
+      }
+
+      const messages = {
+        "auth/email-already-in-use": "Email này đã được đăng ký.",
+        "auth/invalid-email": "Email không hợp lệ.",
+        "auth/user-not-found": "Không tìm thấy tài khoản này.",
+        "auth/wrong-password": "Mật khẩu chưa đúng.",
+        "auth/invalid-credential": "Email hoặc mật khẩu chưa đúng.",
+        "auth/weak-password": "Mật khẩu cần ít nhất 6 ký tự.",
+        "auth/too-many-requests": "Bạn thử quá nhiều lần. Vui lòng đợi một chút."
+      };
+
+      return messages[error.code] || "Không thể xử lý yêu cầu đăng nhập.";
+    }
+
+    showLoginButton.addEventListener("click", () => setAuthMode("login"));
+    showRegisterButton.addEventListener("click", () => setAuthMode("register"));
+    openProgressAuthButton.addEventListener("click", () => openProgressAuthModal("login"));
+    closeDemoCompleteButton.addEventListener("click", closeDemoCompleteModal);
+    closeProgressAuthButton.addEventListener("click", closeProgressAuthModal);
+
+    window.addEventListener("app-shell:auth-action", async (event) => {
+      if (!event.detail || !event.detail.isAuthenticated) {
+        openProgressAuthModal("login");
+        return;
+      }
+
+      authFeedback.textContent = "Đang đăng xuất...";
+
+      try {
+        await gameplayAuthClient.logout();
+        authFeedback.textContent = "Đã đăng xuất.";
+      } catch (error) {
+        authFeedback.textContent = normalizeAuthError(error);
+      }
+    });
+
+    window.addEventListener("story:completed", () => {
+      openDemoCompleteModal();
+    });
+
+    function renderAuthUi(user) {
+      if (!window.AppShell) {
+        return;
+      }
+
+      const isRealUser = Boolean(user);
+      window.AppShell.setAuthState({ isAuthenticated: isRealUser });
+    }
+
+    renderAuthUi(null);
+
+    Promise.resolve(window.FYDFirebase && window.FYDFirebase.ready).then((client) => {
+      if (client && client.enabled) {
+        gameplayAuthClient = client;
+        renderAuthUi(client.getCurrentUser());
+        client.onAuthChange((user) => {
+          renderAuthUi(user);
+        });
+      }
+    });
+
+    loginForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      if (!gameplayAuthClient || !gameplayAuthClient.enabled) {
+        authFeedback.textContent = "Đăng nhập hiện chưa sẵn sàng. Vui lòng kiểm tra cấu hình Firebase.";
+        return;
+      }
+
+      const formData = new FormData(loginForm);
+      authFeedback.textContent = "Đang đăng nhập...";
+
+      try {
+        await gameplayAuthClient.loginWithEmail(formData.get("email"), formData.get("password"));
+        authFeedback.textContent = "Đăng nhập thành công. Tiến độ của bạn đã sẵn sàng để lưu.";
+        loginForm.reset();
+        window.setTimeout(closeProgressAuthModal, 700);
+      } catch (error) {
+        authFeedback.textContent = normalizeAuthError(error);
+      }
+    });
+
+    registerForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      if (!gameplayAuthClient || !gameplayAuthClient.enabled) {
+        authFeedback.textContent = "Đăng ký hiện chưa sẵn sàng. Vui lòng kiểm tra cấu hình Firebase.";
+        return;
+      }
+
+      const formData = new FormData(registerForm);
+      if (formData.get("password") !== formData.get("confirmPassword")) {
+        authFeedback.textContent = "Mật khẩu xác nhận chưa khớp.";
+        registerConfirmPassword.focus();
+        return;
+      }
+
+      authFeedback.textContent = "Đang tạo tài khoản...";
+
+      try {
+        await gameplayAuthClient.registerWithEmail(formData.get("email"), formData.get("password"));
+        authFeedback.textContent = "Đăng ký thành công. Tiến độ của bạn sẽ được lưu từ các màn tiếp theo.";
+        registerForm.reset();
+        window.setTimeout(closeProgressAuthModal, 700);
+      } catch (error) {
+        authFeedback.textContent = normalizeAuthError(error);
+      }
+    });
+  </script>
+  <script>
+    (() => {
+      const progressAuthModal = document.getElementById("progressAuthModal");
+      const authFeedback = document.getElementById("authFeedback");
+      const loginForm = document.getElementById("loginForm");
+      const registerForm = document.getElementById("registerForm");
+      const registerPassword = document.getElementById("registerPassword");
+      const registerConfirmPassword = document.getElementById("registerConfirmPassword");
+      const showLoginButton = document.getElementById("showLoginButton");
+      const showRegisterButton = document.getElementById("showRegisterButton");
+      let gameplayAuthClient = null;
+
+      function setAuthMode(mode) {
+        const isLogin = mode === "login";
+        loginForm.hidden = !isLogin;
+        registerForm.hidden = isLogin;
+        showLoginButton.classList.toggle("active", isLogin);
+        showRegisterButton.classList.toggle("active", !isLogin);
+      }
+
+      function openProgressAuthModal(mode = "login", feedbackMessage = "") {
+        setAuthMode(mode);
+        if (window.AppShell) {
+          window.AppShell.closeMobileMenu();
+        }
+        progressAuthModal.hidden = false;
+        authFeedback.textContent = feedbackMessage;
+      }
+
+      function closeProgressAuthModal() {
+        progressAuthModal.hidden = true;
+      }
+
+      function normalizeAuthError(error) {
+        if (!error || !error.code) {
+          return "Có lỗi xảy ra. Vui lòng thử lại.";
+        }
+
+        const messages = {
+          "auth/email-already-in-use": "Email này đã được đăng ký.",
+          "auth/invalid-email": "Email không hợp lệ.",
+          "auth/user-not-found": "Không tìm thấy tài khoản này.",
+          "auth/wrong-password": "Mật khẩu chưa đúng.",
+          "auth/invalid-credential": "Email hoặc mật khẩu chưa đúng.",
+          "auth/weak-password": "Mật khẩu cần ít nhất 6 ký tự.",
+          "auth/too-many-requests": "Bạn thử quá nhiều lần. Vui lòng đợi một chút."
+        };
+
+        return messages[error.code] || "Không thể xử lý yêu cầu đăng nhập.";
+      }
+
+      function getAuthShellState(user) {
+        const isVerifiedUser = Boolean(user && user.emailVerified);
+        const hasPendingVerification = Boolean(user && !user.emailVerified);
+
+        return {
+          isVerifiedUser,
+          hasPendingVerification,
+          label: isVerifiedUser
+            ? "Đăng xuất"
+            : hasPendingVerification
+              ? "Xác thực email"
+              : "Đăng nhập"
+        };
+      }
+
+      function renderAuthUi(user) {
+        if (!window.AppShell) {
+          return;
+        }
+
+        const { isVerifiedUser, label } = getAuthShellState(user);
+        window.AppShell.setAuthState({ isAuthenticated: isVerifiedUser, label });
+      }
+
+      window.addEventListener("app-shell:auth-action", async (event) => {
+        event.stopImmediatePropagation();
+
+        const currentUser = gameplayAuthClient && gameplayAuthClient.getCurrentUser
+          ? gameplayAuthClient.getCurrentUser()
+          : null;
+        const { isVerifiedUser, hasPendingVerification } = getAuthShellState(currentUser);
+
+        if (!event.detail || !event.detail.isAuthenticated) {
+          const reminder = hasPendingVerification
+            ? "Tài khoản này chưa xác thực email. Hãy kiểm tra hộp thư trước khi lưu tiến độ."
+            : "";
+          openProgressAuthModal("login", reminder);
+          return;
+        }
+
+        if (!isVerifiedUser || !gameplayAuthClient) {
+          openProgressAuthModal("login", "Bạn cần xác thực email trước khi tiếp tục lưu tiến độ.");
+          return;
+        }
+
+        authFeedback.textContent = "Đang đăng xuất...";
+
+        try {
+          await gameplayAuthClient.logout();
+          authFeedback.textContent = "Đã đăng xuất.";
+        } catch (error) {
+          authFeedback.textContent = normalizeAuthError(error);
+        }
+      }, true);
+
+      loginForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+
+        if (!gameplayAuthClient || !gameplayAuthClient.enabled) {
+          authFeedback.textContent = "Đăng nhập hiện chưa sẵn sàng. Vui lòng kiểm tra cấu hình Firebase.";
+          return;
+        }
+
+        const formData = new FormData(loginForm);
+        authFeedback.textContent = "Đang đăng nhập...";
+
+        try {
+          await gameplayAuthClient.loginWithEmail(formData.get("email"), formData.get("password"));
+          const user = await gameplayAuthClient.refreshCurrentUser();
+          renderAuthUi(user);
+
+          if (!user || !user.emailVerified) {
+            authFeedback.textContent = "Đăng nhập thành công, nhưng bạn cần kiểm tra email và xác thực tài khoản trước khi lưu tiến độ.";
+            return;
+          }
+
+          authFeedback.textContent = "Đăng nhập thành công. Tiến độ của bạn đã sẵn sàng để lưu.";
+          loginForm.reset();
+          window.setTimeout(closeProgressAuthModal, 700);
+        } catch (error) {
+          authFeedback.textContent = normalizeAuthError(error);
+        }
+      }, true);
+
+      registerForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+
+        if (!gameplayAuthClient || !gameplayAuthClient.enabled) {
+          authFeedback.textContent = "Đăng ký hiện chưa sẵn sàng. Vui lòng kiểm tra cấu hình Firebase.";
+          return;
+        }
+
+        const formData = new FormData(registerForm);
+        if (formData.get("password") !== formData.get("confirmPassword")) {
+          authFeedback.textContent = "Mật khẩu xác nhận chưa khớp.";
+          registerConfirmPassword.focus();
+          return;
+        }
+
+        authFeedback.textContent = "Đang tạo tài khoản...";
+
+        try {
+          const user = await gameplayAuthClient.registerWithEmail(formData.get("email"), formData.get("password"));
+          await gameplayAuthClient.refreshCurrentUser();
+          renderAuthUi(user);
+          registerForm.reset();
+          if (registerPassword) {
+            registerPassword.value = "";
+          }
+          registerConfirmPassword.value = "";
+          setAuthMode("login");
+          authFeedback.textContent = "Đăng ký thành công. Hãy kiểm tra email để xác thực tài khoản trước khi lưu tiến độ.";
+        } catch (error) {
+          authFeedback.textContent = normalizeAuthError(error);
+        }
+      }, true);
+
+      renderAuthUi(null);
+
+      Promise.resolve(window.FYDFirebase && window.FYDFirebase.ready).then(async (client) => {
+        if (!client || !client.enabled) {
+          return;
+        }
+
+        gameplayAuthClient = client;
+        let currentUser = client.getCurrentUser();
+        if (currentUser) {
+          currentUser = await client.refreshCurrentUser();
+        }
+        renderAuthUi(currentUser);
+
+        client.onAuthChange(async (user) => {
+          const nextUser = user ? await client.refreshCurrentUser() : null;
+          renderAuthUi(nextUser);
+        });
+      });
+    })();
   </script>
   <script src="story_engine.js"></script>
 </body>

@@ -3,37 +3,51 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#07111f" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Aetheria" />
   <title>Aetheria English Quest - Học tiếng Anh qua game cốt truyện</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared-shell.css">
   <style>
     :root {
-      --bg: #090b16;
-      --bg-2: #111528;
-      --card: rgba(255, 255, 255, 0.08);
-      --card-strong: rgba(255, 255, 255, 0.14);
-      --text: #f7f3e8;
-      --muted: #c9c2ad;
-      --gold: #ffd56a;
-      --cyan: #7ee7ff;
-      --rose: #ff8fb8;
-      --green: #9dffb0;
-      --line: rgba(255, 255, 255, 0.16);
-      --shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
-      --radius: 24px;
+      --bg: #07111f;
+      --bg-soft: #101c2e;
+      --panel: rgba(16, 26, 43, 0.76);
+      --panel-strong: rgba(18, 30, 48, 0.92);
+      --line: rgba(255, 255, 255, 0.11);
+      --text: #f6efe2;
+      --muted: #bfc5d3;
+      --gold: #ffd978;
+      --cyan: #8ce9ff;
+      --mint: #b8f4bf;
+      --rose: #ffb0cb;
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+      --radius: 28px;
     }
 
     * {
       box-sizing: border-box;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       margin: 0;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: "Be Vietnam Pro", sans-serif;
       color: var(--text);
       background:
-        radial-gradient(circle at 18% 16%, rgba(126, 231, 255, 0.25), transparent 28%),
-        radial-gradient(circle at 82% 8%, rgba(255, 143, 184, 0.18), transparent 26%),
-        radial-gradient(circle at 50% 88%, rgba(255, 213, 106, 0.16), transparent 32%),
-        linear-gradient(180deg, #080a14 0%, #111528 52%, #070914 100%);
+        radial-gradient(circle at top left, rgba(94, 201, 255, 0.16), transparent 32%),
+        radial-gradient(circle at top right, rgba(255, 168, 204, 0.16), transparent 28%),
+        linear-gradient(135deg, #07111f 0%, #162238 52%, #251424 100%);
       min-height: 100vh;
       overflow-x: hidden;
     }
@@ -43,12 +57,12 @@
       position: fixed;
       inset: 0;
       pointer-events: none;
-      opacity: 0.28;
+      opacity: 0.18;
       background-image:
-        linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
-      background-size: 48px 48px;
-      mask-image: linear-gradient(to bottom, black, transparent 85%);
+        linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+      background-size: 46px 46px;
+      mask-image: linear-gradient(to bottom, black, transparent 86%);
     }
 
     a {
@@ -56,101 +70,102 @@
       text-decoration: none;
     }
 
-    .page {
+    button,
+    input {
+      font: inherit;
+    }
+
+    .page-shell {
       width: min(1180px, calc(100% - 32px));
       margin: 0 auto;
       position: relative;
-      z-index: 2;
+      z-index: 1;
     }
 
     .nav {
       position: sticky;
       top: 0;
-      z-index: 10;
+      z-index: 20;
       backdrop-filter: blur(18px);
-      background: rgba(9, 11, 22, 0.72);
+      background: rgba(7, 12, 24, 0.76);
       border-bottom: 1px solid rgba(255,255,255,0.08);
     }
 
     .nav-inner {
       width: min(1180px, calc(100% - 32px));
       margin: 0 auto;
-      height: 74px;
+      min-height: 82px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 18px;
+      padding: 14px 0;
+      flex-wrap: wrap;
     }
 
     .brand {
       display: flex;
       align-items: center;
-      gap: 12px;
-      font-weight: 800;
-      letter-spacing: 0.3px;
+      gap: 14px;
+      min-width: 0;
     }
 
     .brand-mark {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      border-radius: 18px;
       display: grid;
       place-items: center;
       background:
-        radial-gradient(circle, #fff8c9 0 10%, transparent 11%),
-        conic-gradient(from 20deg, var(--gold), var(--cyan), var(--rose), var(--gold));
-      box-shadow: 0 0 28px rgba(255, 213, 106, 0.42);
-      position: relative;
+        radial-gradient(circle at 32% 30%, #fff8cb 0 14%, transparent 15%),
+        conic-gradient(from 15deg, #ffcf70, #8ce9ff, #ff9dc2, #ffcf70);
+      box-shadow: 0 0 28px rgba(255, 217, 120, 0.24);
+      flex-shrink: 0;
     }
 
     .brand-mark::after {
       content: "✦";
-      color: #101322;
-      font-size: 20px;
+      color: #132136;
+      font-size: 22px;
       font-weight: 900;
+    }
+
+    .brand-copy {
+      min-width: 0;
+    }
+
+    .brand-title {
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 700;
+      font-size: 1.2rem;
+      line-height: 1.1;
+    }
+
+    .brand-subtitle {
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin-top: 4px;
     }
 
     .nav-links {
       display: flex;
       align-items: center;
-      gap: 22px;
+      gap: 20px;
       color: var(--muted);
-      font-size: 14px;
+      font-size: 0.97rem;
+      flex-wrap: wrap;
+      justify-content: center;
     }
 
     .nav-links a:hover {
       color: var(--text);
     }
 
-    .btn {
-      border: 0;
-      color: #111321;
-      background: linear-gradient(135deg, var(--gold), #fff0a3);
-      border-radius: 999px;
-      padding: 13px 20px;
-      font-weight: 800;
-      cursor: pointer;
-      box-shadow: 0 14px 34px rgba(255, 213, 106, 0.22);
-      transition: transform .2s ease, box-shadow .2s ease;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
+    .nav-links a {
+      transition: color .18s ease, background .18s ease, border-color .18s ease;
     }
 
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 20px 44px rgba(255, 213, 106, 0.32);
-    }
-
-    .btn.secondary {
-      background: rgba(255,255,255,0.08);
-      color: var(--text);
-      border: 1px solid rgba(255,255,255,0.15);
-      box-shadow: none;
-    }
-
-    .auth-shell {
+    .nav-actions {
       display: flex;
       align-items: center;
       gap: 10px;
@@ -158,231 +173,347 @@
       justify-content: flex-end;
     }
 
-    .auth-pill {
-      border: 1px solid rgba(255,255,255,0.14);
-      border-radius: 999px;
-      background: rgba(255,255,255,0.06);
+    .menu-toggle {
+      display: none;
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      border-radius: 14px;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+
+    .mobile-menu {
+      position: fixed;
+      top: 64px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 15;
+      display: grid;
+      align-items: start;
+      background: transparent;
+      padding: 12px 14px 14px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease;
+    }
+
+    .mobile-menu[hidden] {
+      display: none;
+    }
+
+    .mobile-menu.is-open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .mobile-menu-panel {
+      width: min(100%, 420px);
+      margin-left: auto;
+      height: auto;
+      max-height: calc(100vh - 96px);
+      overflow-y: auto;
+      border-radius: 28px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: linear-gradient(180deg, rgba(18, 29, 46, 0.98), rgba(9, 15, 27, 0.98));
+      box-shadow: 0 28px 80px rgba(0,0,0,0.42);
+      padding: 18px;
+      transform: translateX(32px) scale(0.98);
+      opacity: 0;
+      transition: transform .28s cubic-bezier(.22, 1, .36, 1), opacity .22s ease;
+    }
+
+    .mobile-menu.is-open .mobile-menu-panel {
+      transform: translateX(0) scale(1);
+      opacity: 1;
+    }
+
+    .mobile-menu-links {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .mobile-menu-links a {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--text);
+    }
+
+    .mobile-menu-links a::after {
+      content: "›";
       color: var(--muted);
+      font-size: 1.2rem;
+      line-height: 1;
+    }
+
+    .mobile-menu-actions {
+      display: grid;
+      gap: 10px;
+    }
+
+    .status-pill {
       padding: 10px 14px;
-      font-size: 13px;
-      line-height: 1.2;
-      max-width: 240px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.05);
+      color: var(--muted);
+      font-size: 0.88rem;
+      max-width: 280px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    .auth-card {
-      margin-top: 26px;
-      max-width: 560px;
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 13px 20px;
+      cursor: pointer;
+      transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+      font-weight: 800;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-primary {
+      color: #12192b;
+      background: linear-gradient(135deg, #ffd977, #fff0b3);
+      box-shadow: 0 16px 38px rgba(255, 217, 120, 0.25);
+    }
+
+    .btn-secondary {
+      color: var(--text);
       background: rgba(255,255,255,0.07);
       border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 24px;
-      padding: 20px;
-      box-shadow: 0 12px 40px rgba(0,0,0,0.16);
+      box-shadow: none;
     }
 
-    .auth-card h3 {
-      margin: 0 0 10px;
-      font-size: 24px;
-    }
-
-    .auth-card p {
-      margin: 0 0 16px;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-
-    .auth-tabs {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-    }
-
-    .auth-tab {
-      border: 1px solid rgba(255,255,255,0.14);
-      border-radius: 999px;
-      background: rgba(255,255,255,0.06);
-      color: var(--text);
-      padding: 10px 14px;
-      cursor: pointer;
-      font: inherit;
-    }
-
-    .auth-tab.active {
-      border-color: rgba(255,213,106,0.48);
-      background: rgba(255,213,106,0.12);
-      color: var(--gold);
-      font-weight: 700;
-    }
-
-    .auth-form {
-      display: grid;
-      gap: 12px;
-    }
-
-    .auth-form[hidden] {
-      display: none;
-    }
-
-    .auth-field {
-      display: grid;
-      gap: 8px;
-    }
-
-    .auth-field label {
-      font-size: 14px;
-      color: var(--muted);
-    }
-
-    .auth-field input {
-      width: 100%;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.14);
-      background: rgba(8,10,20,0.64);
-      color: var(--text);
-      padding: 13px 15px;
-      font: inherit;
-      outline: none;
-    }
-
-    .auth-field input:focus {
-      border-color: rgba(126,231,255,0.48);
-      box-shadow: 0 0 0 3px rgba(126,231,255,0.12);
-    }
-
-    .auth-feedback {
-      min-height: 22px;
+    .btn-ghost {
       color: var(--cyan);
-      font-size: 14px;
+      background: rgba(140, 233, 255, 0.08);
+      border: 1px solid rgba(140, 233, 255, 0.18);
     }
 
     .hero {
-      min-height: calc(100vh - 74px);
+      padding: 48px 0 28px;
       display: grid;
-      grid-template-columns: 1.08fr 0.92fr;
+      grid-template-columns: minmax(0, 1.04fr) minmax(360px, 0.96fr);
+      gap: 36px;
       align-items: center;
-      gap: 44px;
-      padding: 72px 0 60px;
+    }
+
+    .hero-copy {
+      min-width: 0;
     }
 
     .eyebrow {
       width: fit-content;
-      padding: 9px 14px;
-      border: 1px solid rgba(255,255,255,0.16);
+      padding: 10px 16px;
       border-radius: 999px;
-      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
       color: var(--cyan);
       font-weight: 700;
-      font-size: 13px;
-      letter-spacing: 0.35px;
-      margin-bottom: 22px;
+      font-size: 0.92rem;
+      margin-bottom: 24px;
     }
 
     h1 {
-      font-size: clamp(42px, 6vw, 76px);
-      line-height: 0.96;
       margin: 0;
-      letter-spacing: -2.6px;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(3rem, 8vw, 5.35rem);
+      line-height: 0.95;
+      letter-spacing: -0.05em;
     }
 
     .gradient-text {
-      background: linear-gradient(120deg, #fff8df, var(--gold), var(--cyan));
+      background: linear-gradient(120deg, #ffd978, #ebf297 48%, #8ce9ff 96%);
       -webkit-background-clip: text;
+      background-clip: text;
       color: transparent;
     }
 
-    .hero-copy {
+    .hero-description {
+      margin: 24px 0 0;
+      max-width: 640px;
       color: var(--muted);
-      font-size: clamp(17px, 1.8vw, 21px);
-      line-height: 1.7;
-      margin: 26px 0 30px;
-      max-width: 620px;
+      font-size: clamp(1.05rem, 2vw, 1.35rem);
+      line-height: 1.75;
     }
 
     .hero-actions {
       display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-      margin-bottom: 34px;
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
       gap: 12px;
-      max-width: 620px;
+      flex-wrap: wrap;
+      margin: 28px 0 0;
     }
 
-    .stat {
+    .stats-grid {
+      margin-top: 28px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .stat-card {
       background: rgba(255,255,255,0.07);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 18px;
-      padding: 14px 16px;
+      border: 1px solid rgba(255,255,255,0.11);
+      border-radius: 22px;
+      padding: 18px;
     }
 
-    .stat strong {
+    .stat-card strong {
       display: block;
-      font-size: 24px;
+      font-size: 2rem;
       color: var(--gold);
+      line-height: 1;
     }
 
-    .stat span {
+    .stat-card span {
+      display: block;
+      margin-top: 10px;
       color: var(--muted);
-      font-size: 13px;
+      line-height: 1.5;
+      font-size: 0.96rem;
     }
 
-    .game-card {
+    .showcase {
       position: relative;
-      min-height: 620px;
-      border-radius: 34px;
-      padding: 22px;
+      min-height: 690px;
+      border-radius: 36px;
+      padding: 20px;
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.06)),
-        radial-gradient(circle at 50% 0%, rgba(126, 231, 255, 0.22), transparent 36%);
-      border: 1px solid rgba(255,255,255,0.16);
+        linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.05)),
+        radial-gradient(circle at 50% 0%, rgba(140,233,255,0.22), transparent 34%);
+      border: 1px solid rgba(255,255,255,0.14);
       box-shadow: var(--shadow);
       overflow: hidden;
     }
 
-    .game-card::before {
+    .showcase::before {
       content: "";
       position: absolute;
-      inset: 18px;
-      border-radius: 26px;
+      inset: 16px;
+      border-radius: 28px;
+      border: 1px solid rgba(255,255,255,0.1);
       background:
-        linear-gradient(180deg, rgba(8, 10, 20, 0.08), rgba(8, 10, 20, 0.86)),
-        url("data:image/svg+xml,%3Csvg width='900' height='900' viewBox='0 0 900 900' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='sky' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop stop-color='%2317273a'/%3E%3Cstop offset='1' stop-color='%23070812'/%3E%3C/linearGradient%3E%3ClinearGradient id='water' x1='0' y1='0' x2='1' y2='0'%3E%3Cstop stop-color='%23102031'/%3E%3Cstop offset='0.5' stop-color='%23152d40'/%3E%3Cstop offset='1' stop-color='%230b1220'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='900' height='900' fill='url(%23sky)'/%3E%3Crect y='640' width='900' height='260' fill='url(%23water)'/%3E%3Cpath d='M0 255 H900 V355 H0 Z' fill='%23111422'/%3E%3Cpath d='M0 335 C180 320 240 370 420 350 S720 315 900 340 V425 H0 Z' fill='%23090d17'/%3E%3Cpath d='M80 600 C185 560 320 565 430 610 S670 670 835 615' stroke='%237ee7ff' stroke-width='4' fill='none' opacity='0.22'/%3E%3Cpath d='M60 690 C220 655 350 690 470 725 S735 780 860 735' stroke='%23ffd56a' stroke-width='3' fill='none' opacity='0.18'/%3E%3Cg fill='%23ffd56a' opacity='0.9'%3E%3Ccircle cx='108' cy='470' r='4'/%3E%3Ccircle cx='154' cy='442' r='2.6'/%3E%3Ccircle cx='776' cy='478' r='3.4'/%3E%3Ccircle cx='816' cy='448' r='2.2'/%3E%3C/g%3E%3C/svg%3E");
+        linear-gradient(180deg, rgba(11, 17, 29, 0.08), rgba(7, 11, 22, 0.86)),
+        url("data:image/svg+xml,%3Csvg width='900' height='900' viewBox='0 0 900 900' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='sky' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop stop-color='%2317283f'/%3E%3Cstop offset='1' stop-color='%23070912'/%3E%3C/linearGradient%3E%3ClinearGradient id='water' x1='0' y1='0' x2='1' y2='0'%3E%3Cstop stop-color='%23102134'/%3E%3Cstop offset='0.5' stop-color='%23152f43'/%3E%3Cstop offset='1' stop-color='%230c1322'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='900' height='900' fill='url(%23sky)'/%3E%3Crect y='640' width='900' height='260' fill='url(%23water)'/%3E%3Cpath d='M0 255 H900 V355 H0 Z' fill='%23111422'/%3E%3Cpath d='M0 335 C180 320 240 370 420 350 S720 315 900 340 V425 H0 Z' fill='%23090d17'/%3E%3Cpath d='M80 600 C185 560 320 565 430 610 S670 670 835 615' stroke='%237ee7ff' stroke-width='4' fill='none' opacity='0.22'/%3E%3Cpath d='M60 690 C220 655 350 690 470 725 S735 780 860 735' stroke='%23ffd56a' stroke-width='3' fill='none' opacity='0.18'/%3E%3Cg fill='%23ffd56a' opacity='0.9'%3E%3Ccircle cx='108' cy='470' r='4'/%3E%3Ccircle cx='154' cy='442' r='2.6'/%3E%3Ccircle cx='776' cy='478' r='3.4'/%3E%3Ccircle cx='816' cy='448' r='2.2'/%3E%3C/g%3E%3C/svg%3E");
       background-size: cover;
       background-position: center;
+    }
+
+    .quest-box,
+    .dialogue-box,
+    .preview-box {
+      position: absolute;
+      z-index: 1;
+      background: rgba(7, 11, 22, 0.8);
       border: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(16px);
+      border-radius: 24px;
+    }
+
+    .quest-box {
+      top: 34px;
+      left: 34px;
+      width: min(270px, calc(100% - 68px));
+      padding: 18px;
+    }
+
+    .quest-box h3 {
+      margin: 0 0 14px;
+      font-size: 1rem;
+    }
+
+    .quest-item {
+      padding: 12px 0;
+      color: var(--muted);
+      line-height: 1.5;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .quest-item:first-of-type {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .quest-item b {
+      color: var(--mint);
+    }
+
+    .orb {
+      position: absolute;
+      top: 156px;
+      left: 48%;
+      z-index: 1;
+      width: 124px;
+      height: 124px;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 34% 30%, #ffffff, #fff4b8 10%, #8ce9ff 38%, rgba(140,233,255,0.08) 70%);
+      box-shadow:
+        0 0 44px rgba(140,233,255,0.65),
+        0 0 100px rgba(255,217,120,0.25);
+      animation: float 5s ease-in-out infinite;
+    }
+
+    .orb::after {
+      content: "A";
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: #152237;
+      font-size: 44px;
+      font-weight: 900;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(-18px); }
     }
 
     .preview-character {
       position: absolute;
-      right: 42px;
-      bottom: 68px;
-      width: 210px;
+      right: 44px;
+      bottom: 74px;
+      z-index: 1;
+      width: 214px;
       height: 420px;
-      filter: drop-shadow(0 24px 32px rgba(0,0,0,0.45));
+      filter: drop-shadow(0 24px 32px rgba(0,0,0,0.42));
     }
 
     .preview-character .head {
-      width: 100px;
-      height: 118px;
+      width: 102px;
+      height: 120px;
       border-radius: 48% 48% 44% 44%;
       background: linear-gradient(180deg, #ffe5bd, #d99f77);
       margin: 0 auto;
       position: relative;
       z-index: 3;
-      border: 2px solid rgba(255,255,255,0.35);
+      border: 2px solid rgba(255,255,255,0.34);
     }
 
     .preview-character .hair {
       position: absolute;
-      width: 126px;
-      height: 148px;
+      width: 130px;
+      height: 152px;
       left: 42px;
       top: -8px;
       border-radius: 50% 50% 45% 45%;
@@ -403,21 +534,21 @@
     .preview-character .eye.right { right: 31px; }
 
     .preview-character .body {
-      width: 150px;
+      width: 152px;
       height: 230px;
       margin: -2px auto 0;
       border-radius: 54px 54px 34px 34px;
       background: linear-gradient(180deg, #fff6d8, #78dfff 48%, #26466b);
-      border: 2px solid rgba(255,255,255,0.35);
+      border: 2px solid rgba(255,255,255,0.34);
       position: relative;
       z-index: 1;
     }
 
     .preview-character .cape {
       position: absolute;
-      left: 24px;
+      left: 23px;
       top: 122px;
-      width: 162px;
+      width: 166px;
       height: 270px;
       border-radius: 70px 70px 24px 24px;
       background: linear-gradient(180deg, rgba(255, 143, 184, 0.92), rgba(80, 54, 140, 0.78));
@@ -425,99 +556,27 @@
       z-index: 0;
     }
 
-    .quest-panel {
-      position: absolute;
+    .dialogue-box {
       left: 34px;
-      top: 34px;
-      width: 255px;
-      border-radius: 22px;
-      padding: 16px;
-      background: rgba(8,10,20,0.62);
-      border: 1px solid rgba(255,255,255,0.13);
-      backdrop-filter: blur(14px);
-    }
-
-    .quest-panel h3 {
-      margin: 0 0 12px;
-      font-size: 15px;
-    }
-
-    .quest {
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.4;
-      padding: 9px 0;
-      border-top: 1px solid rgba(255,255,255,0.08);
-    }
-
-    .quest:first-of-type {
-      border-top: 0;
-    }
-
-    .quest b {
-      color: var(--green);
-    }
-
-    .dialogue {
-      position: absolute;
-      left: 36px;
-      bottom: 36px;
-      right: 36px;
-      min-height: 132px;
-      border-radius: 24px;
-      background: rgba(8,10,20,0.78);
-      border: 1px solid rgba(255,255,255,0.16);
-      backdrop-filter: blur(18px);
+      right: 34px;
+      bottom: 34px;
+      min-height: 140px;
       padding: 20px;
     }
 
-    .dialogue .name {
+    .dialogue-box .name {
       color: var(--gold);
       font-weight: 900;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
+      font-size: 1.1rem;
     }
 
-    .dialogue p {
+    .dialogue-box p {
       margin: 0;
       color: var(--text);
-      line-height: 1.6;
-      font-size: 15px;
-    }
-
-    .orb {
-      position: absolute;
-      top: 166px;
-      left: 50%;
-      width: 116px;
-      height: 116px;
-      transform: translateX(-50%);
-      border-radius: 50%;
-      background:
-        radial-gradient(circle at 35% 30%, #ffffff, #fff0a3 10%, #7ee7ff 35%, rgba(126,231,255,0.08) 70%);
-      box-shadow:
-        0 0 42px rgba(126,231,255,0.7),
-        0 0 90px rgba(255,213,106,0.28);
-      animation: float 4.8s ease-in-out infinite;
-    }
-
-    .orb::after {
-      content: "A";
-      position: absolute;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      color: #172033;
-      font-weight: 1000;
-      font-size: 42px;
-      opacity: 0.74;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateX(-50%) translateY(0); }
-      50% { transform: translateX(-50%) translateY(-18px); }
+      line-height: 1.7;
+      max-width: 460px;
+      font-size: 1rem;
     }
 
     section {
@@ -529,104 +588,125 @@
       margin-bottom: 28px;
     }
 
-    .section-head h2 {
-      font-size: clamp(32px, 4vw, 52px);
-      line-height: 1.04;
-      letter-spacing: -1.8px;
+    .section-kicker {
+      color: var(--cyan);
+      font-size: 0.95rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 12px;
+    }
+
+    h2 {
       margin: 0 0 14px;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(2rem, 4vw, 3.3rem);
+      line-height: 1.02;
+      letter-spacing: -0.04em;
     }
 
     .section-head p {
-      color: var(--muted);
-      font-size: 18px;
-      line-height: 1.7;
       margin: 0;
+      color: var(--muted);
+      line-height: 1.75;
+      font-size: 1.08rem;
     }
 
-    .features {
+    .feature-grid,
+    .characters-grid,
+    .missions-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
       gap: 16px;
     }
 
-    .feature, .level, .character-card, .mission-card, .pricing-card {
-      background: var(--card);
-      border: 1px solid rgba(255,255,255,0.13);
+    .feature-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .characters-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .missions-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .card {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.11);
       border-radius: var(--radius);
       padding: 22px;
-      box-shadow: 0 12px 40px rgba(0,0,0,0.16);
+      box-shadow: 0 16px 42px rgba(0,0,0,0.16);
     }
 
-    .icon {
+    .card-icon {
       width: 48px;
       height: 48px;
-      border-radius: 16px;
       display: grid;
       place-items: center;
-      margin-bottom: 18px;
-      background: rgba(255,255,255,0.09);
+      border-radius: 16px;
+      margin-bottom: 16px;
+      background: rgba(255,255,255,0.08);
       border: 1px solid rgba(255,255,255,0.12);
-      font-size: 24px;
+      font-size: 1.35rem;
     }
 
-    .feature h3, .level h3, .character-card h3, .mission-card h3 {
+    .card h3 {
       margin: 0 0 10px;
-      font-size: 20px;
+      font-size: 1.2rem;
     }
 
-    .feature p, .level p, .character-card p, .mission-card p {
+    .card p {
       margin: 0;
       color: var(--muted);
-      line-height: 1.65;
+      line-height: 1.7;
     }
 
-    .levels {
+    .world-grid {
       display: grid;
-      grid-template-columns: 0.9fr 1.1fr;
+      grid-template-columns: 0.96fr 1.04fr;
       gap: 18px;
       align-items: stretch;
     }
 
-    .level-list {
+    .chapter-list {
       display: grid;
       gap: 14px;
     }
 
-    .level {
+    .chapter-card {
       cursor: pointer;
       transition: transform .2s ease, background .2s ease, border-color .2s ease;
     }
 
-    .level.active {
-      background: var(--card-strong);
-      border-color: rgba(255, 213, 106, 0.45);
+    .chapter-card.active {
       transform: translateX(8px);
+      border-color: rgba(255, 217, 120, 0.34);
+      background: rgba(255,255,255,0.11);
     }
 
-    .preview {
+    .chapter-preview {
+      position: relative;
       min-height: 470px;
-      border-radius: 30px;
-      padding: 24px;
+      overflow: hidden;
       background:
         linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.05)),
-        radial-gradient(circle at 50% 0%, rgba(255, 213, 106, 0.16), transparent 38%);
-      border: 1px solid rgba(255,255,255,0.14);
-      position: relative;
-      overflow: hidden;
+        radial-gradient(circle at 50% 0%, rgba(255, 217, 120, 0.16), transparent 36%);
     }
 
-    .preview-map {
+    .chapter-map {
       position: absolute;
-      inset: 22px;
+      inset: 20px;
       border-radius: 24px;
       background:
-        radial-gradient(circle at 23% 28%, rgba(126, 231, 255, 0.32), transparent 12%),
-        radial-gradient(circle at 78% 34%, rgba(255, 213, 106, 0.28), transparent 13%),
-        radial-gradient(circle at 54% 78%, rgba(255, 143, 184, 0.24), transparent 18%),
-        linear-gradient(135deg, rgba(15,21,39,0.95), rgba(20,41,66,0.9));
+        radial-gradient(circle at 23% 28%, rgba(140, 233, 255, 0.28), transparent 13%),
+        radial-gradient(circle at 78% 34%, rgba(255, 217, 120, 0.24), transparent 14%),
+        radial-gradient(circle at 54% 78%, rgba(255, 176, 203, 0.22), transparent 18%),
+        linear-gradient(135deg, rgba(13,20,36,0.96), rgba(18,42,69,0.88));
+      border: 1px solid rgba(255,255,255,0.09);
     }
 
-    .path {
+    .chapter-path {
       position: absolute;
       left: 12%;
       right: 12%;
@@ -635,66 +715,59 @@
       background: linear-gradient(90deg, var(--cyan), var(--gold), var(--rose));
       border-radius: 999px;
       transform: rotate(-10deg);
-      box-shadow: 0 0 30px rgba(126,231,255,0.34);
+      box-shadow: 0 0 30px rgba(140,233,255,0.32);
     }
 
-    .node {
+    .chapter-node {
       position: absolute;
       width: 58px;
       height: 58px;
       border-radius: 50%;
       display: grid;
       place-items: center;
-      border: 2px solid rgba(255,255,255,0.35);
-      background: rgba(8,10,20,0.78);
-      box-shadow: 0 0 28px rgba(255,255,255,0.1);
+      background: rgba(7,11,22,0.82);
+      border: 2px solid rgba(255,255,255,0.3);
       font-weight: 900;
     }
 
-    .node:nth-child(2) { left: 14%; top: 57%; color: var(--green); }
-    .node:nth-child(3) { left: 38%; top: 43%; color: var(--cyan); }
-    .node:nth-child(4) { left: 64%; top: 34%; color: var(--gold); }
-    .node:nth-child(5) { left: 78%; top: 18%; color: var(--rose); }
+    .chapter-node:nth-child(2) { left: 14%; top: 58%; color: var(--mint); }
+    .chapter-node:nth-child(3) { left: 38%; top: 43%; color: var(--cyan); }
+    .chapter-node:nth-child(4) { left: 64%; top: 34%; color: var(--gold); }
+    .chapter-node:nth-child(5) { left: 79%; top: 18%; color: var(--rose); }
 
-    .preview-content {
+    .chapter-content {
       position: absolute;
-      left: 46px;
-      right: 46px;
-      bottom: 42px;
-      padding: 18px;
+      left: 34px;
+      right: 34px;
+      bottom: 34px;
       border-radius: 22px;
-      background: rgba(8,10,20,0.74);
-      border: 1px solid rgba(255,255,255,0.13);
-      backdrop-filter: blur(12px);
+      background: rgba(7,11,22,0.76);
+      border: 1px solid rgba(255,255,255,0.11);
+      backdrop-filter: blur(14px);
+      padding: 18px;
     }
 
-    .preview-content h3 {
+    .chapter-content h3 {
       margin: 0 0 8px;
       color: var(--gold);
-      font-size: 24px;
+      font-size: 1.45rem;
     }
 
-    .preview-content p {
-      color: var(--muted);
+    .chapter-content p {
       margin: 0;
-      line-height: 1.6;
-    }
-
-    .characters {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
+      color: var(--muted);
+      line-height: 1.7;
     }
 
     .portrait {
-      height: 150px;
+      height: 156px;
       border-radius: 22px;
       margin-bottom: 18px;
       background:
         radial-gradient(circle at 50% 25%, rgba(255,255,255,0.95), transparent 13%),
-        radial-gradient(circle at 50% 44%, rgba(255, 213, 106, 0.42), transparent 18%),
-        linear-gradient(135deg, rgba(126,231,255,0.2), rgba(255,143,184,0.16));
-      border: 1px solid rgba(255,255,255,0.13);
+        radial-gradient(circle at 50% 44%, rgba(255, 217, 120, 0.42), transparent 18%),
+        linear-gradient(135deg, rgba(140,233,255,0.18), rgba(255,176,203,0.16));
+      border: 1px solid rgba(255,255,255,0.12);
       position: relative;
       overflow: hidden;
     }
@@ -706,39 +779,17 @@
       bottom: -10px;
       width: 88px;
       height: 118px;
-      border-radius: 40px 40px 18px 18px;
       transform: translateX(-50%);
-      background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(126,231,255,0.55));
-    }
-
-    .missions {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-    }
-
-    .mission-card {
-      position: relative;
-      overflow: hidden;
-    }
-
-    .mission-card::after {
-      content: "";
-      position: absolute;
-      right: -30px;
-      top: -30px;
-      width: 110px;
-      height: 110px;
-      border-radius: 50%;
-      background: rgba(255,213,106,0.12);
+      border-radius: 42px 42px 18px 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(140,233,255,0.58));
     }
 
     .progress {
       height: 10px;
-      background: rgba(255,255,255,0.12);
       border-radius: 999px;
+      background: rgba(255,255,255,0.11);
       overflow: hidden;
-      margin-top: 18px;
+      margin-top: 16px;
     }
 
     .progress span {
@@ -749,240 +800,353 @@
     }
 
     .cta {
-      margin: 70px 0 90px;
-      border-radius: 34px;
-      padding: clamp(28px, 5vw, 58px);
+      margin: 20px 0 90px;
+      padding: clamp(26px, 5vw, 54px);
       text-align: center;
+      border-radius: 34px;
       background:
-        radial-gradient(circle at 50% 0%, rgba(255, 213, 106, 0.2), transparent 36%),
+        radial-gradient(circle at 50% 0%, rgba(255, 217, 120, 0.18), transparent 36%),
         linear-gradient(135deg, rgba(255,255,255,0.14), rgba(255,255,255,0.06));
-      border: 1px solid rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.12);
       box-shadow: var(--shadow);
     }
 
-    .cta h2 {
-      margin: 0 auto 16px;
+    .cta p {
       max-width: 760px;
-      font-size: clamp(34px, 5vw, 60px);
-      line-height: 1.05;
-      letter-spacing: -2px;
+      margin: 14px auto 0;
+      color: var(--muted);
+      line-height: 1.75;
+      font-size: 1.05rem;
     }
 
-    .cta p {
-      margin: 0 auto 26px;
-      max-width: 690px;
-      color: var(--muted);
-      line-height: 1.7;
-      font-size: 18px;
+    .cta .hero-actions {
+      justify-content: center;
+      margin-top: 24px;
     }
 
     .footer {
-      padding: 34px 0;
-      border-top: 1px solid rgba(255,255,255,0.09);
-      color: var(--muted);
-      font-size: 14px;
       display: flex;
       justify-content: space-between;
-      gap: 14px;
+      gap: 12px;
+      padding: 0 0 34px;
+      color: var(--muted);
+      font-size: 0.95rem;
       flex-wrap: wrap;
     }
 
-    .mobile-menu {
+    .auth-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: rgba(4, 7, 14, 0.72);
+      backdrop-filter: blur(12px);
+    }
+
+    .auth-modal[hidden] {
       display: none;
     }
 
-    @media (max-width: 940px) {
-      .hero, .levels {
+    .auth-modal-card {
+      width: min(560px, 100%);
+      max-height: min(92vh, 780px);
+      overflow: auto;
+      border-radius: 30px;
+      border: 1px solid rgba(255,255,255,0.11);
+      background:
+        radial-gradient(circle at top right, rgba(255, 217, 120, 0.12), transparent 32%),
+        linear-gradient(180deg, rgba(18, 29, 46, 0.98), rgba(9, 15, 27, 0.98));
+      box-shadow: 0 32px 90px rgba(0,0,0,0.45);
+      padding: 24px;
+      position: relative;
+    }
+
+    .auth-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 1.4rem;
+    }
+
+    .auth-modal-card h3 {
+      margin: 0;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(2rem, 5vw, 2.6rem);
+      line-height: 1;
+      max-width: 420px;
+    }
+
+    .auth-modal-card p {
+      margin: 12px 0 0;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 430px;
+    }
+
+    .auth-tabs {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin: 22px 0 18px;
+    }
+
+    .auth-tab {
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+      padding: 10px 15px;
+      cursor: pointer;
+      min-height: 46px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .auth-tab.active {
+      color: #0f1727;
+      background: linear-gradient(135deg, var(--gold), #fff0b3);
+      border-color: transparent;
+      font-weight: 800;
+    }
+
+    .auth-form {
+      display: grid;
+      gap: 14px;
+    }
+
+    .auth-form[hidden] {
+      display: none;
+    }
+
+    .auth-field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .auth-field label {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .auth-field input {
+      width: 100%;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      padding: 14px 15px;
+      outline: none;
+    }
+
+    .auth-field input:focus {
+      border-color: rgba(140,233,255,0.46);
+      box-shadow: 0 0 0 3px rgba(140,233,255,0.12);
+    }
+
+    .auth-feedback {
+      min-height: 24px;
+      margin-top: 12px;
+      color: var(--cyan);
+      line-height: 1.5;
+    }
+
+    @media (max-width: 1080px) {
+      .hero,
+      .world-grid {
         grid-template-columns: 1fr;
       }
 
-      .hero {
-        padding-top: 44px;
+      .showcase {
+        min-height: 640px;
       }
 
-      .game-card {
-        min-height: 560px;
+      .feature-grid,
+      .missions-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
-      .features, .missions {
-        grid-template-columns: 1fr;
+      .characters-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .page-shell,
+      .nav-inner {
+        width: min(100% - 22px, 1180px);
       }
 
-      .characters {
-        grid-template-columns: repeat(2, 1fr);
+      .nav-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 0;
+      }
+
+      .brand {
+        width: auto;
+        gap: 0;
+        align-items: center;
+        min-width: 0;
+      }
+
+      .brand-mark {
+        display: none;
+      }
+
+      .brand-copy {
+        display: block;
+        min-width: 0;
+      }
+
+      .brand-title {
+        font-size: 1.06rem;
+        line-height: 1.12;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .brand-subtitle {
+        display: none;
+      }
+
+      .nav-actions {
+        display: none;
+      }
+
+      .menu-toggle {
+        display: inline-flex;
       }
 
       .nav-links {
         display: none;
       }
 
-      .mobile-menu {
-        display: inline-flex;
-      }
-    }
-
-    @media (max-width: 620px) {
-      .page, .nav-inner {
-        width: min(100% - 22px, 1180px);
+      .hero {
+        padding-top: 28px;
       }
 
-      .nav-inner {
-        height: 66px;
-      }
-
-      h1 {
-        letter-spacing: -1.4px;
-      }
-
-      .stats {
-        grid-template-columns: 1fr;
+      .hero-actions {
+        flex-direction: column;
       }
 
       .hero-actions .btn {
         width: 100%;
       }
 
-      .characters {
+      .stats-grid,
+      .feature-grid,
+      .characters-grid,
+      .missions-grid {
         grid-template-columns: 1fr;
       }
 
-      .game-card {
+      .showcase {
         min-height: 620px;
-        padding: 12px;
+        padding: 14px;
       }
 
-      .quest-panel {
-        top: 24px;
+      .quest-box {
         left: 24px;
+        top: 24px;
         width: calc(100% - 48px);
       }
 
       .orb {
-        top: 235px;
+        top: 232px;
+        left: 50%;
+        width: 106px;
+        height: 106px;
       }
 
-      .character {
-        right: 26px;
-        bottom: 110px;
-        transform: scale(0.76);
+      .preview-character {
+        right: 20px;
+        bottom: 118px;
+        transform: scale(0.8);
         transform-origin: bottom right;
       }
 
-      .dialogue {
+      .dialogue-box {
         left: 24px;
         right: 24px;
         bottom: 24px;
       }
 
-      .dialogue p {
+      .dialogue-box p {
         max-width: 100%;
       }
 
       section {
-        padding: 48px 0;
+        padding: 54px 0;
+      }
+
+      .cta {
+        margin-bottom: 64px;
+      }
+
+      .footer {
+        justify-content: center;
+        text-align: center;
       }
     }
   </style>
 </head>
 <body>
-  <nav class="nav">
-    <div class="nav-inner">
-      <a class="brand" href="#">
-        <span class="brand-mark"></span>
-        <span>Aetheria English Quest</span>
-      </a>
+  <div id="appShell"></div>
 
-      <div class="nav-links">
-        <a href="#method">Phương pháp</a>
-        <a href="#world">Thế giới</a>
-        <a href="#characters">Nhân vật</a>
-        <a href="#missions">Nhiệm vụ</a>
-      </div>
-
-      <div class="auth-shell">
-        <div class="auth-pill" id="authStatus">Dang ket noi tai khoan...</div>
-        <button class="btn secondary" id="logoutButton" hidden>Dang xuat</button>
-        <a class="btn mobile-menu" href="gameplay_intro.html">Chơi thử</a>
-        <a class="btn" href="#start">Bắt đầu học</a>
-      </div>
-    </div>
-  </nav>
-
-  <main class="page">
+  <main class="page-shell">
     <section class="hero">
-      <div>
+      <div class="hero-copy">
         <div class="eyebrow">Khóa học tiếng Anh tương tác dạng game cốt truyện</div>
         <h1>
-          Học tiếng Anh bằng cách
-          <span class="gradient-text">bước vào một thế giới</span>
+          Học tiếng Anh bằng cách bước
+          <span class="gradient-text">vào một thế giới</span>
         </h1>
-        <p class="hero-copy">
+        <p class="hero-description">
           Mỗi bài học là một màn truyện. Người học hoàn thành nhiệm vụ, mở khóa nhân vật,
-          luyện nghe - nói - đọc - viết và dùng tiếng Anh để đưa câu chuyện tiến về phía trước.
+          luyện nghe, nói, đọc, viết và dùng tiếng Anh để đẩy câu chuyện tiến về phía trước.
         </p>
 
         <div class="hero-actions">
-          <a class="btn" href="gameplay_intro.html">Chơi thử màn đầu ✦</a>
-          <a class="btn secondary" href="#world">Xem lộ trình</a>
+          <a class="btn btn-primary" href="gameplay_intro.html">Chơi thử màn đầu ✦</a>
+          <a class="btn btn-secondary" href="#world">Xem lộ trình</a>
         </div>
 
-        <div class="auth-card" id="auth">
-          <h3>Tao tai khoan de luu tien do</h3>
-          <p>Dang nhap bang email de dong bo tien do hoc, hoac dang ky nhanh tai khoan moi.</p>
-          <div class="auth-tabs">
-            <button class="auth-tab active" id="showLoginButton" type="button">Dang nhap</button>
-            <button class="auth-tab" id="showRegisterButton" type="button">Dang ky</button>
-          </div>
-
-          <form class="auth-form" id="loginForm">
-            <div class="auth-field">
-              <label for="loginEmail">Email</label>
-              <input id="loginEmail" name="email" type="email" autocomplete="email" required>
-            </div>
-            <div class="auth-field">
-              <label for="loginPassword">Mat khau</label>
-              <input id="loginPassword" name="password" type="password" autocomplete="current-password" required>
-            </div>
-            <button class="btn" type="submit">Dang nhap</button>
-          </form>
-
-          <form class="auth-form" id="registerForm" hidden>
-            <div class="auth-field">
-              <label for="registerEmail">Email</label>
-              <input id="registerEmail" name="email" type="email" autocomplete="email" required>
-            </div>
-            <div class="auth-field">
-              <label for="registerPassword">Mat khau</label>
-              <input id="registerPassword" name="password" type="password" autocomplete="new-password" minlength="6" required>
-            </div>
-            <button class="btn" type="submit">Dang ky tai khoan</button>
-          </form>
-
-          <div class="auth-feedback" id="authFeedback"></div>
-        </div>
-
-        <div class="stats">
-          <div class="stat">
+        <div class="stats-grid">
+          <div class="stat-card">
             <strong>60+</strong>
-            <span>màn học theo cốt truyện</span>
+            <span>Màn học theo cốt truyện với nhiều nhánh lựa chọn.</span>
           </div>
-          <div class="stat">
+          <div class="stat-card">
             <strong>4</strong>
-            <span>kỹ năng được luyện cùng lúc</span>
+            <span>Kỹ năng được luyện cùng lúc trong từng chương.</span>
           </div>
-          <div class="stat">
+          <div class="stat-card">
             <strong>AI</strong>
-            <span>gợi ý, chấm bài, hội thoại</span>
+            <span>Gợi ý, chấm bài và cá nhân hóa lộ trình học.</span>
           </div>
         </div>
       </div>
 
-      <div class="game-card" aria-label="Game preview">
-        <div class="quest-panel">
+      <div class="showcase" aria-label="Xem trước gameplay">
+        <div class="quest-box">
           <h3>Nhiệm vụ hôm nay</h3>
-          <div class="quest">✓ <span><b>Listen:</b> Nghe lời nhắn từ Noesis</span></div>
-          <div class="quest">✓ <span><b>Speak:</b> Đọc 5 câu thần chú tiếng Anh</span></div>
-          <div class="quest">• <span><b>Choose:</b> Chọn câu trả lời để mở cổng Aetheria</span></div>
+          <div class="quest-item">✓ <span><b>Listen:</b> Nghe lời nhắn từ Noesis</span></div>
+          <div class="quest-item">✓ <span><b>Speak:</b> Đọc 5 câu thần chú tiếng Anh</span></div>
+          <div class="quest-item">• <span><b>Choose:</b> Chọn câu trả lời để mở cổng Aetheria</span></div>
         </div>
 
         <div class="orb"></div>
@@ -997,39 +1161,38 @@
           <div class="body"></div>
         </div>
 
-        <div class="dialogue">
+        <div class="dialogue-box">
           <div class="name">Minh Châu</div>
-          <p>
-            “Mỗi câu tiếng Anh là một lựa chọn có thể thay đổi diễn biến câu chuyện.”
-          </p>
+          <p>“Mỗi câu tiếng Anh là một lựa chọn có thể thay đổi diễn biến của cả câu chuyện.”</p>
         </div>
       </div>
     </section>
 
     <section id="method">
       <div class="section-head">
+        <div class="section-kicker">Phương pháp</div>
         <h2>Không học như làm bài tập. Học như đang phiêu lưu.</h2>
         <p>
-          Hệ thống biến mỗi đơn vị kiến thức thành một tình huống có ý nghĩa:
-          người học không chỉ nhớ từ vựng, mà dùng nó để giải quyết vấn đề trong truyện.
+          Hệ thống biến từng đơn vị kiến thức thành một tình huống có ý nghĩa:
+          người học không chỉ nhớ từ vựng, mà còn dùng nó để giải quyết vấn đề trong truyện.
         </p>
       </div>
 
-      <div class="features">
-        <article class="feature">
-          <div class="icon">🎧</div>
+      <div class="feature-grid">
+        <article class="card">
+          <div class="card-icon">🎧</div>
           <h3>Nghe trong ngữ cảnh</h3>
-          <p>Không nghe câu rời rạc. Người học nghe lời thoại, tin nhắn, nhiệm vụ và manh mối trong thế giới game.</p>
+          <p>Không nghe câu rời rạc. Người học nghe lời thoại, tin nhắn, nhiệm vụ và manh mối ngay trong thế giới game.</p>
         </article>
 
-        <article class="feature">
-          <div class="icon">🗣️</div>
+        <article class="card">
+          <div class="card-icon">🗣️</div>
           <h3>Nói để mở khóa</h3>
-          <p>Phát âm đúng để kích hoạt kỹ năng, trả lời nhân vật hoặc hoàn thành nghi thức trong từng màn học.</p>
+          <p>Phát âm đúng để kích hoạt kỹ năng, trả lời nhân vật hoặc hoàn thành thử thách trong từng màn học.</p>
         </article>
 
-        <article class="feature">
-          <div class="icon">🧩</div>
+        <article class="card">
+          <div class="card-icon">🧩</div>
           <h3>Từ vựng thành nhiệm vụ</h3>
           <p>Từ mới, mẫu câu và ngữ pháp được đưa vào câu đố, lựa chọn hội thoại và nhiệm vụ tương tác.</p>
         </article>
@@ -1038,47 +1201,48 @@
 
     <section id="world">
       <div class="section-head">
+        <div class="section-kicker">Lộ trình</div>
         <h2>Lộ trình học là một bản đồ phiêu lưu</h2>
         <p>
           Người học đi qua từng vùng đất, mỗi vùng đại diện cho một nhóm kỹ năng.
-          Học càng nhiều, thế giới càng mở rộng.
+          Học càng nhiều, thế giới càng mở rộng và câu chuyện càng có chiều sâu.
         </p>
       </div>
 
-      <div class="levels">
-        <div class="level-list">
-          <article class="level active" data-title="Chapter 1: The First Letter" data-desc="Làm quen câu chào, giới thiệu bản thân, câu mệnh lệnh đơn giản và hội thoại ngắn.">
+      <div class="world-grid">
+        <div class="chapter-list">
+          <article class="card chapter-card active" data-title="Chương 1: Lá thư đầu tiên" data-desc="Làm quen câu chào, giới thiệu bản thân, câu mệnh lệnh đơn giản và hội thoại ngắn.">
             <h3>Chương 1: Lá thư đầu tiên</h3>
-            <p>Chào hỏi, giới thiệu bản thân, nghe câu ngắn.</p>
+            <p>Chào hỏi, giới thiệu bản thân, nghe câu ngắn và phản hồi cơ bản.</p>
           </article>
 
-          <article class="level" data-title="Chapter 2: The Silent Library" data-desc="Đọc hiểu đoạn ngắn, tìm keyword, học từ vựng theo chủ đề trường học và nhiệm vụ.">
+          <article class="card chapter-card" data-title="Chương 2: Thư viện im lặng" data-desc="Đọc hiểu đoạn ngắn, tìm từ khóa, học từ vựng theo chủ đề trường học và nhiệm vụ.">
             <h3>Chương 2: Thư viện im lặng</h3>
-            <p>Đọc hiểu, từ vựng, lựa chọn câu trả lời.</p>
+            <p>Đọc hiểu, tìm keyword, chọn câu trả lời đúng để tiếp tục truyện.</p>
           </article>
 
-          <article class="level" data-title="Chapter 3: The Speaking Gate" data-desc="Luyện phát âm câu phổ biến, câu không phổ biến và phản xạ hội thoại theo tình huống.">
+          <article class="card chapter-card" data-title="Chương 3: Cánh cổng giọng nói" data-desc="Luyện phát âm câu phổ biến, phản xạ hội thoại và nói theo vai trong bối cảnh game.">
             <h3>Chương 3: Cánh cổng giọng nói</h3>
-            <p>Phát âm, nói theo vai, phản xạ nhanh.</p>
+            <p>Phát âm, nói theo vai, phản xạ nhanh trong tình huống áp lực.</p>
           </article>
 
-          <article class="level" data-title="Chapter 4: The Mind Kingdom" data-desc="Dùng tiếng Anh để tranh luận, thuyết phục, mô tả cảm xúc và giải quyết xung đột trong truyện.">
+          <article class="card chapter-card" data-title="Chương 4: Vương quốc tâm trí" data-desc="Dùng tiếng Anh để tranh luận, thuyết phục, mô tả cảm xúc và giải quyết xung đột trong truyện.">
             <h3>Chương 4: Vương quốc tâm trí</h3>
-            <p>Viết, thuyết phục, cảm xúc, lựa chọn nhánh truyện.</p>
+            <p>Viết, thuyết phục, bộc lộ cảm xúc và mở khóa nhánh truyện mới.</p>
           </article>
         </div>
 
-        <div class="preview">
-          <div class="preview-map">
-            <div class="path"></div>
-            <div class="node">1</div>
-            <div class="node">2</div>
-            <div class="node">3</div>
-            <div class="node">4</div>
+        <div class="card chapter-preview">
+          <div class="chapter-map">
+            <div class="chapter-path"></div>
+            <div class="chapter-node">1</div>
+            <div class="chapter-node">2</div>
+            <div class="chapter-node">3</div>
+            <div class="chapter-node">4</div>
           </div>
 
-          <div class="preview-content">
-            <h3 id="previewTitle">Chapter 1: The First Letter</h3>
+          <div class="chapter-content">
+            <h3 id="previewTitle">Chương 1: Lá thư đầu tiên</h3>
             <p id="previewDesc">Làm quen câu chào, giới thiệu bản thân, câu mệnh lệnh đơn giản và hội thoại ngắn.</p>
           </div>
         </div>
@@ -1087,79 +1251,85 @@
 
     <section id="characters">
       <div class="section-head">
-        <h2>Nhân vật đồng hành giúp việc học có cảm xúc</h2>
+        <div class="section-kicker">Nhân vật</div>
+        <h2>Nhân vật đồng hành giúp việc học có cảm xúc hơn</h2>
         <p>
-          Mỗi nhân vật đại diện cho một kiểu hỗ trợ khác nhau: chữa lỗi, gợi ý, thử thách,
+          Mỗi nhân vật đại diện cho một kiểu hỗ trợ khác nhau: sửa lỗi, gợi ý, thử thách,
           động viên hoặc mở khóa nhánh truyện mới.
         </p>
       </div>
 
-      <div class="characters">
-        <article class="character-card">
+      <div class="characters-grid">
+        <article class="card">
           <div class="portrait"></div>
           <h3>Minh Châu</h3>
-          <p>Người dẫn truyện dịu dàng. Giúp người học hiểu ý nghĩa câu và dùng tiếng Anh có cảm xúc.</p>
+          <p>Người dẫn truyện dịu dàng, giúp người học hiểu ý nghĩa câu và dùng tiếng Anh có cảm xúc.</p>
         </article>
 
-        <article class="character-card">
+        <article class="card">
           <div class="portrait"></div>
           <h3>Diễm Phúc</h3>
-          <p>Người bạn ấm áp. Tạo nhiệm vụ giao tiếp, luyện phản xạ và câu nói đời thường.</p>
+          <p>Người bạn ấm áp, tạo nhiệm vụ giao tiếp và luyện phản xạ bằng những tình huống đời thường.</p>
         </article>
 
-        <article class="character-card">
+        <article class="card">
           <div class="portrait"></div>
           <h3>Đăng Khoa</h3>
-          <p>Người phân tích. Giải thích ngữ pháp, cấu trúc câu và mẹo ghi nhớ logic.</p>
+          <p>Người phân tích, giải thích ngữ pháp, cấu trúc câu và mẹo ghi nhớ logic cho từng bài học.</p>
         </article>
 
-        <article class="character-card">
+        <article class="card">
           <div class="portrait"></div>
           <h3>Noesis</h3>
-          <p>AI đồng hành. Chấm bài, đưa gợi ý vừa đủ và cá nhân hóa nhiệm vụ tiếp theo.</p>
+          <p>AI đồng hành, chấm bài, đưa gợi ý vừa đủ và cá nhân hóa nhiệm vụ tiếp theo cho từng người học.</p>
         </article>
       </div>
     </section>
 
     <section id="missions">
       <div class="section-head">
+        <div class="section-kicker">Nhiệm vụ</div>
         <h2>Mỗi ngày học bằng một chuỗi nhiệm vụ nhỏ</h2>
         <p>
-          Bài học ngắn, có mục tiêu rõ, dễ chơi lại và có cảm giác tiến bộ giống một game nhập vai nhẹ.
+          Bài học ngắn, có mục tiêu rõ, dễ chơi lại và mang cảm giác tiến bộ giống như một game nhập vai nhẹ.
         </p>
       </div>
 
-      <div class="missions">
-        <article class="mission-card">
-          <div class="icon">📜</div>
+      <div class="missions-grid">
+        <article class="card">
+          <div class="card-icon">📜</div>
           <h3>Quest đọc hiểu</h3>
           <p>Đọc thư, nhật ký, manh mối và chọn thông tin đúng để mở khóa cảnh tiếp theo.</p>
           <div class="progress"><span style="width: 78%"></span></div>
         </article>
 
-        <article class="mission-card">
-          <div class="icon">🔮</div>
+        <article class="card">
+          <div class="card-icon">🔮</div>
           <h3>Quest từ vựng</h3>
-          <p>Thu thập thẻ từ, ghép nghĩa, đặt câu và dùng từ đúng trong hội thoại.</p>
+          <p>Thu thập thẻ từ, ghép nghĩa, đặt câu và dùng từ đúng trong hội thoại của nhiệm vụ.</p>
           <div class="progress"><span style="width: 64%"></span></div>
         </article>
 
-        <article class="mission-card">
-          <div class="icon">🎙️</div>
+        <article class="card">
+          <div class="card-icon">🎙️</div>
           <h3>Quest phát âm</h3>
-          <p>Đọc câu để kích hoạt kỹ năng, mở cổng, trả lời NPC hoặc hoàn thành thử thách.</p>
+          <p>Đọc câu để kích hoạt kỹ năng, mở cổng, trả lời NPC hoặc hoàn thành thử thách bằng giọng nói.</p>
           <div class="progress"><span style="width: 52%"></span></div>
         </article>
       </div>
     </section>
 
-    <section id="start" class="cta">
-      <h2>Sẵn sàng biến khóa học tiếng Anh thành một hành trình?</h2>
+    <section class="cta" id="start">
+      <div class="section-kicker">Sẵn sàng bắt đầu</div>
+      <h2>Biến khóa học tiếng Anh thành một hành trình mà người học muốn quay lại mỗi ngày</h2>
       <p>
-        Bản homepage này có thể phát triển tiếp thành portal học tập:
-        chọn nhân vật, chọn chương, chơi mini game, lưu tiến trình và mở khóa nội dung mới.
+        Homepage này có thể phát triển tiếp thành cổng học tập hoàn chỉnh:
+        chọn nhân vật, chọn chương, chơi mini game, lưu tiến trình và mở khóa nội dung mới theo tiến độ.
       </p>
-      <a class="btn" href="gameplay_intro.html">Vào màn chơi đầu ✦</a>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="gameplay_intro.html">Vào màn chơi đầu tiên</a>
+        <button class="btn btn-secondary" id="ctaOpenAuthButton" type="button">Đăng nhập để lưu tiến độ</button>
+      </div>
     </section>
 
     <footer class="footer">
@@ -1168,123 +1338,421 @@
     </footer>
   </main>
 
+  <div class="auth-modal" id="authModal" hidden>
+    <div class="auth-modal-card" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
+      <button class="auth-close" id="closeAuthModalButton" type="button" aria-label="Đóng popup đăng nhập">×</button>
+      <h3 id="authModalTitle">Đăng nhập để lưu tiến độ học</h3>
+      <p>
+        Bạn có thể đăng nhập bằng email hoặc tạo tài khoản mới ngay trong popup này.
+        Sau khi đăng nhập, hệ thống sẽ đồng bộ tiến độ học của bạn.
+      </p>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="showLoginButton" type="button">Đăng nhập</button>
+        <button class="auth-tab" id="showRegisterButton" type="button">Đăng ký</button>
+      </div>
+
+      <form class="auth-form" id="loginForm">
+        <div class="auth-field">
+          <label for="loginEmail">Email</label>
+          <input id="loginEmail" name="email" type="email" autocomplete="email" required>
+        </div>
+        <div class="auth-field">
+          <label for="loginPassword">Mật khẩu</label>
+          <input id="loginPassword" name="password" type="password" autocomplete="current-password" required>
+        </div>
+        <button class="btn btn-primary" type="submit">Đăng nhập</button>
+      </form>
+
+      <form class="auth-form" id="registerForm" hidden>
+        <div class="auth-field">
+          <label for="registerEmail">Email</label>
+          <input id="registerEmail" name="email" type="email" autocomplete="email" required>
+        </div>
+        <div class="auth-field">
+          <label for="registerPassword">Mật khẩu</label>
+          <input id="registerPassword" name="password" type="password" autocomplete="new-password" minlength="6" required>
+        </div>
+        <div class="auth-field">
+          <label for="registerConfirmPassword">Xác nhận mật khẩu</label>
+          <input id="registerConfirmPassword" name="confirmPassword" type="password" autocomplete="new-password" minlength="6" required>
+        </div>
+        <button class="btn btn-primary" type="submit">Tạo tài khoản</button>
+      </form>
+
+      <div class="auth-feedback" id="authFeedback"></div>
+    </div>
+  </div>
+
   <script src="firebase-config.js"></script>
+  <script>
+    window.PAGE_META = {
+      currentPage: "home"
+    };
+  </script>
+  <script src="pwa.js"></script>
+  <script src="shared-shell.js"></script>
   <script type="module" src="firebase-client.js"></script>
   <script>
-    const levels = document.querySelectorAll('.level');
-    const previewTitle = document.getElementById('previewTitle');
-    const previewDesc = document.getElementById('previewDesc');
-    const authStatus = document.getElementById('authStatus');
-    const authFeedback = document.getElementById('authFeedback');
-    const logoutButton = document.getElementById('logoutButton');
-    const loginForm = document.getElementById('loginForm');
-    const registerForm = document.getElementById('registerForm');
-    const showLoginButton = document.getElementById('showLoginButton');
-    const showRegisterButton = document.getElementById('showRegisterButton');
+    const previewTitle = document.getElementById("previewTitle");
+    const previewDesc = document.getElementById("previewDesc");
+    const chapterCards = document.querySelectorAll(".chapter-card");
+    const authFeedback = document.getElementById("authFeedback");
+    const ctaOpenAuthButton = document.getElementById("ctaOpenAuthButton");
+    const authModal = document.getElementById("authModal");
+    const closeAuthModalButton = document.getElementById("closeAuthModalButton");
+    const loginForm = document.getElementById("loginForm");
+    const registerForm = document.getElementById("registerForm");
+    const registerPassword = document.getElementById("registerPassword");
+    const registerConfirmPassword = document.getElementById("registerConfirmPassword");
+    const showLoginButton = document.getElementById("showLoginButton");
+    const showRegisterButton = document.getElementById("showRegisterButton");
+    let firebaseAuthClient = null;
 
     function setAuthMode(mode) {
-      const loginMode = mode === 'login';
-      loginForm.hidden = !loginMode;
-      registerForm.hidden = loginMode;
-      showLoginButton.classList.toggle('active', loginMode);
-      showRegisterButton.classList.toggle('active', !loginMode);
-      authFeedback.textContent = '';
+      const isLogin = mode === "login";
+      loginForm.hidden = !isLogin;
+      registerForm.hidden = isLogin;
+      showLoginButton.classList.toggle("active", isLogin);
+      showRegisterButton.classList.toggle("active", !isLogin);
+      authFeedback.textContent = "";
     }
 
-    function describeUser(user) {
-      if (!user) return 'Chua dang nhap';
-      if (user.isAnonymous) return 'Dang choi bang tai khoan khach';
-      return `Da dang nhap: ${user.email}`;
+    function openAuthModal(mode = "login") {
+      setAuthMode(mode);
+      if (window.AppShell) {
+        window.AppShell.closeMobileMenu();
+      }
+      authModal.hidden = false;
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeAuthModal() {
+      authModal.hidden = true;
+      document.body.style.overflow = "";
+      authFeedback.textContent = "";
     }
 
     function normalizeAuthError(error) {
       if (!error || !error.code) {
-        return 'Co loi xay ra. Vui long thu lai.';
+        return "Có lỗi xảy ra. Vui lòng thử lại.";
       }
 
       const messages = {
-        'auth/email-already-in-use': 'Email nay da duoc dang ky.',
-        'auth/invalid-email': 'Email khong hop le.',
-        'auth/user-not-found': 'Khong tim thay tai khoan nay.',
-        'auth/wrong-password': 'Mat khau chua dung.',
-        'auth/invalid-credential': 'Email hoac mat khau chua dung.',
-        'auth/weak-password': 'Mat khau can it nhat 6 ky tu.',
-        'auth/too-many-requests': 'Thu qua nhieu lan. Vui long doi mot chut.'
+        "auth/email-already-in-use": "Email này đã được đăng ký.",
+        "auth/invalid-email": "Email không hợp lệ.",
+        "auth/user-not-found": "Không tìm thấy tài khoản này.",
+        "auth/wrong-password": "Mật khẩu chưa đúng.",
+        "auth/invalid-credential": "Email hoặc mật khẩu chưa đúng.",
+        "auth/weak-password": "Mật khẩu cần ít nhất 6 ký tự.",
+        "auth/too-many-requests": "Bạn thử quá nhiều lần. Vui lòng đợi một chút."
       };
 
-      return messages[error.code] || 'Khong the xu ly yeu cau dang nhap.';
+      return messages[error.code] || "Không thể xử lý yêu cầu đăng nhập.";
     }
 
-    levels.forEach(level => {
-      level.addEventListener('click', () => {
-        levels.forEach(item => item.classList.remove('active'));
-        level.classList.add('active');
-
-        previewTitle.textContent = level.dataset.title;
-        previewDesc.textContent = level.dataset.desc;
+    chapterCards.forEach((card) => {
+      card.addEventListener("click", () => {
+        chapterCards.forEach((item) => item.classList.remove("active"));
+        card.classList.add("active");
+        previewTitle.textContent = card.dataset.title;
+        previewDesc.textContent = card.dataset.desc;
       });
     });
 
-    showLoginButton.addEventListener('click', () => setAuthMode('login'));
-    showRegisterButton.addEventListener('click', () => setAuthMode('register'));
+    showLoginButton.addEventListener("click", () => setAuthMode("login"));
+    showRegisterButton.addEventListener("click", () => setAuthMode("register"));
+    ctaOpenAuthButton.addEventListener("click", () => openAuthModal("login"));
+    closeAuthModalButton.addEventListener("click", closeAuthModal);
 
-    Promise.resolve(window.FYDFirebase && window.FYDFirebase.ready).then(async (client) => {
-      if (!client || !client.enabled) {
-        authStatus.textContent = 'Firebase chua san sang cho dang nhap.';
-        authFeedback.textContent = 'Can kiem tra Firebase config de bat dang nhap.';
+    window.addEventListener("app-shell:auth-action", async (event) => {
+      if (!event.detail || !event.detail.isAuthenticated) {
+        openAuthModal("login");
         return;
       }
 
-      const renderUser = (user) => {
-        authStatus.textContent = describeUser(user);
-        logoutButton.hidden = !user || user.isAnonymous;
-      };
+      authFeedback.textContent = "Đang đăng xuất...";
 
-      renderUser(client.getCurrentUser());
+      try {
+        await firebaseAuthClient.logout();
+        authFeedback.textContent = "Đã đăng xuất.";
+      } catch (error) {
+        authFeedback.textContent = normalizeAuthError(error);
+      }
+    });
+
+    authModal.addEventListener("click", (event) => {
+      if (event.target === authModal) {
+        closeAuthModal();
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !authModal.hidden) {
+        closeAuthModal();
+      }
+    });
+
+    loginForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (!firebaseAuthClient || !firebaseAuthClient.enabled) {
+        authFeedback.textContent = "Đăng nhập hiện chưa sẵn sàng. Vui lòng kiểm tra cấu hình Firebase.";
+        return;
+      }
+
+      const formData = new FormData(loginForm);
+      authFeedback.textContent = "Đang đăng nhập...";
+
+      try {
+        await firebaseAuthClient.loginWithEmail(formData.get("email"), formData.get("password"));
+        authFeedback.textContent = "Đăng nhập thành công.";
+        loginForm.reset();
+        closeAuthModal();
+      } catch (error) {
+        authFeedback.textContent = normalizeAuthError(error);
+      }
+    });
+
+    registerForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (!firebaseAuthClient || !firebaseAuthClient.enabled) {
+        authFeedback.textContent = "Đăng ký hiện chưa sẵn sàng. Vui lòng kiểm tra cấu hình Firebase.";
+        return;
+      }
+
+      const formData = new FormData(registerForm);
+      if (formData.get("password") !== formData.get("confirmPassword")) {
+        authFeedback.textContent = "Mật khẩu xác nhận chưa khớp.";
+        registerConfirmPassword.focus();
+        return;
+      }
+
+      authFeedback.textContent = "Đang tạo tài khoản...";
+
+      try {
+        await firebaseAuthClient.registerWithEmail(formData.get("email"), formData.get("password"));
+        authFeedback.textContent = "Đăng ký thành công. Bạn đã được đăng nhập.";
+        registerForm.reset();
+        registerPassword.value = "";
+        registerConfirmPassword.value = "";
+        closeAuthModal();
+      } catch (error) {
+        authFeedback.textContent = normalizeAuthError(error);
+      }
+    });
+
+    function renderAuthUi(user) {
+      const isRealUser = Boolean(user);
+      if (window.AppShell) {
+        window.AppShell.setAuthState({ isAuthenticated: isRealUser });
+      }
+      ctaOpenAuthButton.hidden = isRealUser;
+    }
+
+    renderAuthUi(null);
+
+    Promise.resolve(window.FYDFirebase && window.FYDFirebase.ready).then(async (client) => {
+      if (!client || !client.enabled) {
+        return;
+      }
+
+      firebaseAuthClient = client;
+      renderAuthUi(client.getCurrentUser());
       client.onAuthChange((user) => {
-        renderUser(user);
-      });
-
-      loginForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const formData = new FormData(loginForm);
-        authFeedback.textContent = 'Dang dang nhap...';
-
-        try {
-          await client.loginWithEmail(formData.get('email'), formData.get('password'));
-          authFeedback.textContent = 'Dang nhap thanh cong.';
-          loginForm.reset();
-        } catch (error) {
-          authFeedback.textContent = normalizeAuthError(error);
-        }
-      });
-
-      registerForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const formData = new FormData(registerForm);
-        authFeedback.textContent = 'Dang tao tai khoan...';
-
-        try {
-          await client.registerWithEmail(formData.get('email'), formData.get('password'));
-          authFeedback.textContent = 'Dang ky thanh cong. Ban da duoc dang nhap.';
-          registerForm.reset();
-          setAuthMode('login');
-        } catch (error) {
-          authFeedback.textContent = normalizeAuthError(error);
-        }
-      });
-
-      logoutButton.addEventListener('click', async () => {
-        authFeedback.textContent = 'Dang dang xuat...';
-
-        try {
-          await client.logout();
-          authFeedback.textContent = 'Da dang xuat. He thong da quay ve tai khoan khach.';
-        } catch (error) {
-          authFeedback.textContent = normalizeAuthError(error);
-        }
+        renderAuthUi(user);
       });
     });
+  </script>
+  <script>
+    (() => {
+      const authModal = document.getElementById("authModal");
+      const authFeedback = document.getElementById("authFeedback");
+      const ctaOpenAuthButton = document.getElementById("ctaOpenAuthButton");
+      const loginForm = document.getElementById("loginForm");
+      const registerForm = document.getElementById("registerForm");
+      const registerPassword = document.getElementById("registerPassword");
+      const registerConfirmPassword = document.getElementById("registerConfirmPassword");
+      const showLoginButton = document.getElementById("showLoginButton");
+      const showRegisterButton = document.getElementById("showRegisterButton");
+      let firebaseAuthClient = null;
+
+      function setAuthMode(mode) {
+        const isLogin = mode === "login";
+        loginForm.hidden = !isLogin;
+        registerForm.hidden = isLogin;
+        showLoginButton.classList.toggle("active", isLogin);
+        showRegisterButton.classList.toggle("active", !isLogin);
+      }
+
+      function openAuthModal(mode = "login", feedbackMessage = "") {
+        setAuthMode(mode);
+        if (window.AppShell) {
+          window.AppShell.closeMobileMenu();
+        }
+        authModal.hidden = false;
+        document.body.style.overflow = "hidden";
+        authFeedback.textContent = feedbackMessage;
+      }
+
+      function closeAuthModal() {
+        authModal.hidden = true;
+        document.body.style.overflow = "";
+      }
+
+      function normalizeAuthError(error) {
+        if (!error || !error.code) {
+          return "Có lỗi xảy ra. Vui lòng thử lại.";
+        }
+
+        const messages = {
+          "auth/email-already-in-use": "Email này đã được đăng ký.",
+          "auth/invalid-email": "Email không hợp lệ.",
+          "auth/user-not-found": "Không tìm thấy tài khoản này.",
+          "auth/wrong-password": "Mật khẩu chưa đúng.",
+          "auth/invalid-credential": "Email hoặc mật khẩu chưa đúng.",
+          "auth/weak-password": "Mật khẩu cần ít nhất 6 ký tự.",
+          "auth/too-many-requests": "Bạn thử quá nhiều lần. Vui lòng đợi một chút."
+        };
+
+        return messages[error.code] || "Không thể xử lý yêu cầu đăng nhập.";
+      }
+
+      function getAuthShellState(user) {
+        const isVerifiedUser = Boolean(user && user.emailVerified);
+        const hasPendingVerification = Boolean(user && !user.emailVerified);
+
+        return {
+          isVerifiedUser,
+          hasPendingVerification,
+          label: isVerifiedUser
+            ? "Đăng xuất"
+            : hasPendingVerification
+              ? "Xác thực email"
+              : "Đăng nhập"
+        };
+      }
+
+      function renderAuthUi(user) {
+        const { isVerifiedUser, label } = getAuthShellState(user);
+        if (window.AppShell) {
+          window.AppShell.setAuthState({ isAuthenticated: isVerifiedUser, label });
+        }
+        ctaOpenAuthButton.hidden = isVerifiedUser;
+      }
+
+      window.addEventListener("app-shell:auth-action", async (event) => {
+        event.stopImmediatePropagation();
+
+        const currentUser = firebaseAuthClient && firebaseAuthClient.getCurrentUser
+          ? firebaseAuthClient.getCurrentUser()
+          : null;
+        const { isVerifiedUser, hasPendingVerification } = getAuthShellState(currentUser);
+
+        if (!event.detail || !event.detail.isAuthenticated) {
+          const reminder = hasPendingVerification
+            ? "Tài khoản này chưa xác thực email. Hãy kiểm tra hộp thư rồi quay lại để tiếp tục lưu tiến độ."
+            : "";
+          openAuthModal("login", reminder);
+          return;
+        }
+
+        if (!isVerifiedUser || !firebaseAuthClient) {
+          openAuthModal("login", "Bạn cần xác thực email trước khi tài khoản được xem là hợp lệ.");
+          return;
+        }
+
+        authFeedback.textContent = "Đang đăng xuất...";
+
+        try {
+          await firebaseAuthClient.logout();
+          authFeedback.textContent = "Đã đăng xuất.";
+        } catch (error) {
+          authFeedback.textContent = normalizeAuthError(error);
+        }
+      }, true);
+
+      loginForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+
+        if (!firebaseAuthClient || !firebaseAuthClient.enabled) {
+          authFeedback.textContent = "Đăng nhập hiện chưa sẵn sàng. Vui lòng kiểm tra cấu hình Firebase.";
+          return;
+        }
+
+        const formData = new FormData(loginForm);
+        authFeedback.textContent = "Đang đăng nhập...";
+
+        try {
+          await firebaseAuthClient.loginWithEmail(formData.get("email"), formData.get("password"));
+          const user = await firebaseAuthClient.refreshCurrentUser();
+          renderAuthUi(user);
+
+          if (!user || !user.emailVerified) {
+            authFeedback.textContent = "Đăng nhập thành công, nhưng bạn cần kiểm tra email và xác thực tài khoản trước khi lưu tiến độ.";
+            return;
+          }
+
+          authFeedback.textContent = "Đăng nhập thành công.";
+          loginForm.reset();
+          closeAuthModal();
+        } catch (error) {
+          authFeedback.textContent = normalizeAuthError(error);
+        }
+      }, true);
+
+      registerForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+
+        if (!firebaseAuthClient || !firebaseAuthClient.enabled) {
+          authFeedback.textContent = "Đăng ký hiện chưa sẵn sàng. Vui lòng kiểm tra cấu hình Firebase.";
+          return;
+        }
+
+        const formData = new FormData(registerForm);
+        if (formData.get("password") !== formData.get("confirmPassword")) {
+          authFeedback.textContent = "Mật khẩu xác nhận chưa khớp.";
+          registerConfirmPassword.focus();
+          return;
+        }
+
+        authFeedback.textContent = "Đang tạo tài khoản...";
+
+        try {
+          const user = await firebaseAuthClient.registerWithEmail(formData.get("email"), formData.get("password"));
+          await firebaseAuthClient.refreshCurrentUser();
+          renderAuthUi(user);
+          registerForm.reset();
+          registerPassword.value = "";
+          registerConfirmPassword.value = "";
+          setAuthMode("login");
+          authFeedback.textContent = "Đăng ký thành công. Hãy kiểm tra email để xác thực tài khoản trước khi lưu tiến độ.";
+        } catch (error) {
+          authFeedback.textContent = normalizeAuthError(error);
+        }
+      }, true);
+
+      renderAuthUi(null);
+
+      Promise.resolve(window.FYDFirebase && window.FYDFirebase.ready).then(async (client) => {
+        if (!client || !client.enabled) {
+          return;
+        }
+
+        firebaseAuthClient = client;
+        let currentUser = client.getCurrentUser();
+        if (currentUser) {
+          currentUser = await client.refreshCurrentUser();
+        }
+        renderAuthUi(currentUser);
+
+        client.onAuthChange(async (user) => {
+          const nextUser = user ? await client.refreshCurrentUser() : null;
+          renderAuthUi(nextUser);
+        });
+      });
+    })();
   </script>
 </body>
 </html>

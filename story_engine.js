@@ -1,23 +1,23 @@
 (function () {
   const config = window.STORY_CONFIG || {};
-  const storyId = config.storyId || 'default-story';
+  const storyId = config.storyId || "default-story";
 
-  const sceneText = document.getElementById('sceneText');
-  const speechBlock = document.getElementById('speechBlock');
-  const speakerText = document.getElementById('speakerText');
-  const lineText = document.getElementById('lineText');
-  const responseBlock = document.getElementById('responseBlock');
-  const questionText = document.getElementById('questionText');
-  const choicesList = document.getElementById('choicesList');
-  const instructionText = document.getElementById('instructionText');
-  const resultModal = document.getElementById('resultModal');
-  const resultLabel = document.getElementById('resultLabel');
-  const resultText = document.getElementById('resultText');
-  const okButton = document.getElementById('okButton');
-  const dynamicStats = document.getElementById('dynamicStats');
-  const saveStatusText = document.getElementById('saveStatusText');
-  const continueButton = document.getElementById('continueButton');
-  const restartButton = document.getElementById('restartButton');
+  const sceneText = document.getElementById("sceneText");
+  const speechBlock = document.getElementById("speechBlock");
+  const speakerText = document.getElementById("speakerText");
+  const lineText = document.getElementById("lineText");
+  const responseBlock = document.getElementById("responseBlock");
+  const questionText = document.getElementById("questionText");
+  const choicesList = document.getElementById("choicesList");
+  const instructionText = document.getElementById("instructionText");
+  const resultModal = document.getElementById("resultModal");
+  const resultLabel = document.getElementById("resultLabel");
+  const resultText = document.getElementById("resultText");
+  const okButton = document.getElementById("okButton");
+  const dynamicStats = document.getElementById("dynamicStats");
+  const saveStatusText = document.getElementById("saveStatusText");
+  const continueButton = document.getElementById("continueButton");
+  const restartButton = document.getElementById("restartButton");
 
   let storyData = null;
   let currentNode = null;
@@ -41,14 +41,19 @@
 
     firebaseClient = await window.FYDFirebase.ready;
     if (!firebaseClient || !firebaseClient.enabled) {
-      updateSaveStatus('Dang choi che do local. Chua ket noi Firebase progress.');
+      updateSaveStatus("Đang chơi chế độ local. Chưa kết nối Firebase progress.");
     }
+
     return firebaseClient;
   }
 
   async function fetchSavedProgress() {
     const client = await getFirebaseClient();
     if (!client || !client.enabled) return null;
+    if (!client.isAuthenticated || !client.isAuthenticated()) {
+      updateSaveStatus("Bạn đang chơi thử ở chế độ local. Đăng nhập để lưu tiến độ.");
+      return null;
+    }
 
     savedProgress = await client.loadPlayerProgress(storyId);
     return savedProgress;
@@ -72,28 +77,35 @@
   async function persistProgress() {
     const client = await getFirebaseClient();
     if (!client || !client.enabled || !currentNode) return;
+    if (!client.isAuthenticated || !client.isAuthenticated()) {
+      updateSaveStatus("Tiến độ chỉ được lưu sau khi bạn đăng nhập.");
+      return;
+    }
 
     try {
-      updateSaveStatus('Dang luu tien do...');
+      updateSaveStatus("Đang lưu tiến độ...");
       await client.savePlayerProgress(storyId, {
         storyId,
-        storyUrl: config.storyUrl || '',
+        storyUrl: config.storyUrl || "",
         currentNodeId: currentNode.id,
         playerState
       });
+
       savedProgress = {
         storyId,
-        storyUrl: config.storyUrl || '',
+        storyUrl: config.storyUrl || "",
         currentNodeId: currentNode.id,
         playerState: structuredClone(playerState)
       };
+
       if (continueButton) {
         continueButton.hidden = false;
       }
-      updateSaveStatus('Da luu tien do len Firebase.');
+
+      updateSaveStatus("Đã lưu tiến độ lên Firebase.");
     } catch (error) {
-      updateSaveStatus('Luu tien do that bai. Van co the choi tiep.');
-      console.error('Cannot save progress to Firebase:', error);
+      updateSaveStatus("Lưu tiến độ thất bại. Vẫn có thể chơi tiếp.");
+      console.error("Cannot save progress to Firebase:", error);
     }
   }
 
@@ -103,26 +115,41 @@
     speechBlock.hidden = true;
   }
 
-  function validateStory(story) {
-    if (!story || typeof story !== 'object') {
-      throw new Error('Story data must be an object.');
+  function getEmbeddedStory() {
+    const embeddedStoryElement = document.getElementById("embeddedStoryData");
+    if (!embeddedStoryElement) {
+      return null;
     }
 
-    if (!story.startNodeId || typeof story.startNodeId !== 'string') {
-      throw new Error('Missing startNodeId.');
+    try {
+      return JSON.parse(embeddedStoryElement.textContent);
+    } catch (error) {
+      console.error("Embedded story JSON is invalid:", error);
+      return null;
+    }
+  }
+
+  function validateStory(story) {
+    if (!story || typeof story !== "object") {
+      throw new Error("Story data must be an object.");
+    }
+
+    if (!story.startNodeId || typeof story.startNodeId !== "string") {
+      throw new Error("Missing startNodeId.");
     }
 
     if (!Array.isArray(story.nodes) || story.nodes.length === 0) {
-      throw new Error('Story must include at least one node.');
+      throw new Error("Story must include at least one node.");
     }
 
     const nodeIds = new Set();
+
     story.nodes.forEach((node, index) => {
-      if (!node || typeof node !== 'object') {
+      if (!node || typeof node !== "object") {
         throw new Error(`Node at index ${index} is invalid.`);
       }
 
-      if (!node.id || typeof node.id !== 'string') {
+      if (!node.id || typeof node.id !== "string") {
         throw new Error(`Node at index ${index} is missing an id.`);
       }
 
@@ -137,11 +164,11 @@
       }
 
       node.choices.forEach((choice, choiceIndex) => {
-        if (!choice || typeof choice !== 'object') {
+        if (!choice || typeof choice !== "object") {
           throw new Error(`Choice ${choiceIndex + 1} in node "${node.id}" is invalid.`);
         }
 
-        if (!choice.text || typeof choice.text !== 'string') {
+        if (!choice.text || typeof choice.text !== "string") {
           throw new Error(`Choice ${choiceIndex + 1} in node "${node.id}" is missing text.`);
         }
       });
@@ -151,7 +178,7 @@
       throw new Error(`startNodeId "${story.startNodeId}" does not exist.`);
     }
 
-    story.nodes.forEach(node => {
+    story.nodes.forEach((node) => {
       node.choices.forEach((choice, choiceIndex) => {
         if (choice.nextNodeId && !nodeIds.has(choice.nextNodeId)) {
           throw new Error(
@@ -163,12 +190,25 @@
 
     return story;
   }
+
   async function loadStory() {
     try {
-      if (!config.storyUrl) throw new Error('Missing storyUrl');
-      const response = await fetch(config.storyUrl);
-      if (!response.ok) throw new Error(`Cannot load ${config.storyUrl}`);
-      storyData = validateStory(await response.json());
+      const embeddedStory = getEmbeddedStory();
+
+      if (embeddedStory) {
+        storyData = validateStory(embeddedStory);
+      } else {
+        if (!config.storyUrl) {
+          throw new Error("Missing storyUrl");
+        }
+
+        const response = await fetch(config.storyUrl);
+        if (!response.ok) {
+          throw new Error(`Cannot load ${config.storyUrl}`);
+        }
+
+        storyData = validateStory(await response.json());
+      }
     } catch (error) {
       showLoadError(`Không thể tải dữ liệu màn chơi. ${error.message}`);
       return;
@@ -184,29 +224,29 @@
       if (continueButton) {
         continueButton.hidden = false;
       }
-      updateSaveStatus('Tim thay tien do cu. Ban co the tiep tuc hoac choi lai tu dau.');
+
+      updateSaveStatus("Tìm thấy tiến độ cũ. Bạn có thể tiếp tục hoặc chơi lại từ đầu.");
       return;
     }
 
-    updateSaveStatus('Chua co tien do cu. Bat dau tu dau.');
-    await persistProgress();
+    updateSaveStatus("Chưa có tiến độ đã lưu. Bạn có thể bắt đầu chơi ngay.");
   }
 
   function getNode(id) {
-    return storyData.nodes.find(node => node.id === id);
+    return storyData.nodes.find((node) => node.id === id);
   }
 
   function renderNode(node) {
     if (!node) return;
 
     currentNode = node;
-    sceneText.textContent = node.scene || '';
-    questionText.textContent = node.question || '';
-    instructionText.textContent = node.instruction || '';
-    choicesList.innerHTML = '';
+    sceneText.textContent = node.scene || "";
+    questionText.textContent = node.question || "";
+    instructionText.textContent = node.instruction || "";
+    choicesList.innerHTML = "";
     responseBlock.hidden = false;
 
-    if (node.type === 'dialogue' && node.speaker && node.line) {
+    if (node.type === "dialogue" && node.speaker && node.line) {
       speakerText.textContent = node.speaker;
       lineText.textContent = `"${node.line}"`;
       speechBlock.hidden = false;
@@ -214,29 +254,29 @@
       speechBlock.hidden = true;
     }
 
-    (node.choices || []).forEach(choice => {
-      const button = document.createElement('button');
-      button.className = 'choice';
+    (node.choices || []).forEach((choice) => {
+      const button = document.createElement("button");
+      button.className = "choice";
       button.textContent = choice.text;
-      button.addEventListener('click', () => openResult(choice));
+      button.addEventListener("click", () => openResult(choice));
       choicesList.appendChild(button);
     });
   }
 
   function applyEffects(effects = []) {
-    effects.forEach(effect => {
-      if (effect.type === 'stat') {
+    effects.forEach((effect) => {
+      if (effect.type === "stat") {
         const currentValue = Number(playerState[effect.key] || 0);
-        if (effect.op === 'set') {
+        if (effect.op === "set") {
           playerState[effect.key] = Number(effect.value || 0);
         } else {
           playerState[effect.key] = currentValue + Number(effect.value || 0);
         }
       }
 
-      if (effect.type === 'flag') {
-        playerState[effect.key] = typeof effect.value === 'string'
-          ? effect.value.toLowerCase() === 'true'
+      if (effect.type === "flag") {
+        playerState[effect.key] = typeof effect.value === "string"
+          ? effect.value.toLowerCase() === "true"
           : Boolean(effect.value);
       }
     });
@@ -247,10 +287,10 @@
   function renderStats() {
     if (!dynamicStats) return;
 
-    dynamicStats.innerHTML = '';
-    (storyData.visibleStats || []).forEach(stat => {
-      const row = document.createElement('div');
-      row.className = 'status-row dynamic';
+    dynamicStats.innerHTML = "";
+    (storyData.visibleStats || []).forEach((stat) => {
+      const row = document.createElement("div");
+      row.className = "status-row dynamic";
       row.innerHTML = `<strong>${stat.label}</strong>${playerState[stat.key] ?? 0}`;
       dynamicStats.appendChild(row);
     });
@@ -258,36 +298,48 @@
 
   function openResult(choice) {
     pendingChoice = choice;
-    [...choicesList.children].forEach(item => item.classList.remove('correct', 'wrong'));
+    [...choicesList.children].forEach((item) => item.classList.remove("correct", "wrong"));
 
-    const clickedButton = [...choicesList.children].find(item => item.textContent === choice.text);
+    const clickedButton = [...choicesList.children].find((item) => item.textContent === choice.text);
     if (clickedButton) {
-      clickedButton.classList.add(choice.result === 'correct' ? 'correct' : 'wrong');
+      clickedButton.classList.add(choice.result === "correct" ? "correct" : "wrong");
     }
 
-    resultLabel.textContent = choice.result === 'correct' ? 'Lựa chọn phù hợp' : 'Chưa hợp ngữ cảnh';
-    resultText.textContent = choice.feedback || '';
+    resultLabel.textContent = choice.result === "correct" ? "Lựa chọn phù hợp" : "Chưa hợp ngữ cảnh";
+    resultText.textContent = choice.feedback || "";
     resultModal.hidden = false;
   }
 
-  okButton.addEventListener('click', () => {
+  function emitStoryCompleted(choice) {
+    window.dispatchEvent(new CustomEvent("story:completed", {
+      detail: {
+        storyId,
+        currentNodeId: currentNode ? currentNode.id : null,
+        playerState: structuredClone(playerState),
+        finalChoice: choice ? structuredClone(choice) : null
+      }
+    }));
+  }
+
+  okButton.addEventListener("click", () => {
     if (!pendingChoice) return;
 
     applyEffects(pendingChoice.effects);
-    sceneText.textContent = pendingChoice.afterScene || currentNode.scene || '';
+    sceneText.textContent = pendingChoice.afterScene || currentNode.scene || "";
     resultModal.hidden = true;
 
     if (pendingChoice.nextNodeId) {
       renderNode(getNode(pendingChoice.nextNodeId));
     } else {
       responseBlock.hidden = true;
+      emitStoryCompleted(pendingChoice);
     }
 
     void persistProgress();
   });
 
   if (continueButton) {
-    continueButton.addEventListener('click', () => {
+    continueButton.addEventListener("click", () => {
       if (!savedProgress) return;
 
       playerState = structuredClone(storyData.stateDefaults || {});
@@ -295,18 +347,18 @@
       applySavedProgress();
       renderStats();
       renderNode(currentNode);
-      updateSaveStatus('Da phuc hoi tien do da luu.');
+      updateSaveStatus("Đã phục hồi tiến độ đã lưu.");
     });
   }
 
   if (restartButton) {
-    restartButton.addEventListener('click', () => {
+    restartButton.addEventListener("click", () => {
       pendingChoice = null;
       playerState = structuredClone(storyData.stateDefaults || {});
       currentNode = getNode(storyData.startNodeId);
       renderStats();
       renderNode(currentNode);
-      updateSaveStatus('Da reset ve dau truyen. Dang cap nhat luu moi...');
+      updateSaveStatus("Đã reset về đầu truyện. Đang cập nhật lưu mới...");
       void persistProgress();
     });
   }
