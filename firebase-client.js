@@ -1,7 +1,11 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
 import {
+  createUserWithEmailAndPassword,
   getAuth,
-  signInAnonymously
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signInAnonymously,
+  signOut
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 import {
   doc,
@@ -41,16 +45,53 @@ async function createFirebaseClient() {
     const app = initializeApp(config);
     const auth = getAuth(app);
     const db = getFirestore(app);
-    const credential = await signInAnonymously(auth);
-    const uid = credential.user.uid;
+    const authReady = new Promise((resolve) => {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        unsubscribe();
+        resolve(user || null);
+      });
+    });
+
+    let currentUser = await authReady;
+
+    if (!currentUser) {
+      const credential = await signInAnonymously(auth);
+      currentUser = credential.user;
+    }
 
     function getProgressRef(storyId) {
-      return doc(db, "users", uid, "progress", storyId);
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error("No authenticated user available.");
+      }
+      return doc(db, "users", user.uid, "progress", storyId);
     }
 
     return {
       enabled: true,
-      uid,
+      get uid() {
+        return auth.currentUser ? auth.currentUser.uid : null;
+      },
+      auth,
+      getCurrentUser() {
+        return auth.currentUser;
+      },
+      onAuthChange(callback) {
+        return onAuthStateChanged(auth, callback);
+      },
+      async registerWithEmail(email, password) {
+        const credential = await createUserWithEmailAndPassword(auth, email, password);
+        return credential.user;
+      },
+      async loginWithEmail(email, password) {
+        const credential = await signInWithEmailAndPassword(auth, email, password);
+        return credential.user;
+      },
+      async logout() {
+        await signOut(auth);
+        await signInAnonymously(auth);
+        return auth.currentUser;
+      },
       async loadPlayerProgress(storyId) {
         const snapshot = await getDoc(getProgressRef(storyId));
         return snapshot.exists() ? snapshot.data() : null;

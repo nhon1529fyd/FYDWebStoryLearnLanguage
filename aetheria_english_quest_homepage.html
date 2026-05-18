@@ -150,6 +150,114 @@
       box-shadow: none;
     }
 
+    .auth-shell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .auth-pill {
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      color: var(--muted);
+      padding: 10px 14px;
+      font-size: 13px;
+      line-height: 1.2;
+      max-width: 240px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .auth-card {
+      margin-top: 26px;
+      max-width: 560px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 24px;
+      padding: 20px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.16);
+    }
+
+    .auth-card h3 {
+      margin: 0 0 10px;
+      font-size: 24px;
+    }
+
+    .auth-card p {
+      margin: 0 0 16px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .auth-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .auth-tab {
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      padding: 10px 14px;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .auth-tab.active {
+      border-color: rgba(255,213,106,0.48);
+      background: rgba(255,213,106,0.12);
+      color: var(--gold);
+      font-weight: 700;
+    }
+
+    .auth-form {
+      display: grid;
+      gap: 12px;
+    }
+
+    .auth-form[hidden] {
+      display: none;
+    }
+
+    .auth-field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .auth-field label {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .auth-field input {
+      width: 100%;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(8,10,20,0.64);
+      color: var(--text);
+      padding: 13px 15px;
+      font: inherit;
+      outline: none;
+    }
+
+    .auth-field input:focus {
+      border-color: rgba(126,231,255,0.48);
+      box-shadow: 0 0 0 3px rgba(126,231,255,0.12);
+    }
+
+    .auth-feedback {
+      min-height: 22px;
+      color: var(--cyan);
+      font-size: 14px;
+    }
+
     .hero {
       min-height: calc(100vh - 74px);
       display: grid;
@@ -791,8 +899,12 @@
         <a href="#missions">Nhiệm vụ</a>
       </div>
 
-      <a class="btn mobile-menu" href="gameplay_intro.html">Chơi thử</a>
-      <a class="btn" href="#start">Bắt đầu học</a>
+      <div class="auth-shell">
+        <div class="auth-pill" id="authStatus">Dang ket noi tai khoan...</div>
+        <button class="btn secondary" id="logoutButton" hidden>Dang xuat</button>
+        <a class="btn mobile-menu" href="gameplay_intro.html">Chơi thử</a>
+        <a class="btn" href="#start">Bắt đầu học</a>
+      </div>
     </div>
   </nav>
 
@@ -812,6 +924,41 @@
         <div class="hero-actions">
           <a class="btn" href="gameplay_intro.html">Chơi thử màn đầu ✦</a>
           <a class="btn secondary" href="#world">Xem lộ trình</a>
+        </div>
+
+        <div class="auth-card" id="auth">
+          <h3>Tao tai khoan de luu tien do</h3>
+          <p>Dang nhap bang email de dong bo tien do hoc, hoac dang ky nhanh tai khoan moi.</p>
+          <div class="auth-tabs">
+            <button class="auth-tab active" id="showLoginButton" type="button">Dang nhap</button>
+            <button class="auth-tab" id="showRegisterButton" type="button">Dang ky</button>
+          </div>
+
+          <form class="auth-form" id="loginForm">
+            <div class="auth-field">
+              <label for="loginEmail">Email</label>
+              <input id="loginEmail" name="email" type="email" autocomplete="email" required>
+            </div>
+            <div class="auth-field">
+              <label for="loginPassword">Mat khau</label>
+              <input id="loginPassword" name="password" type="password" autocomplete="current-password" required>
+            </div>
+            <button class="btn" type="submit">Dang nhap</button>
+          </form>
+
+          <form class="auth-form" id="registerForm" hidden>
+            <div class="auth-field">
+              <label for="registerEmail">Email</label>
+              <input id="registerEmail" name="email" type="email" autocomplete="email" required>
+            </div>
+            <div class="auth-field">
+              <label for="registerPassword">Mat khau</label>
+              <input id="registerPassword" name="password" type="password" autocomplete="new-password" minlength="6" required>
+            </div>
+            <button class="btn" type="submit">Dang ky tai khoan</button>
+          </form>
+
+          <div class="auth-feedback" id="authFeedback"></div>
         </div>
 
         <div class="stats">
@@ -1021,10 +1168,52 @@
     </footer>
   </main>
 
+  <script src="firebase-config.js"></script>
+  <script type="module" src="firebase-client.js"></script>
   <script>
     const levels = document.querySelectorAll('.level');
     const previewTitle = document.getElementById('previewTitle');
     const previewDesc = document.getElementById('previewDesc');
+    const authStatus = document.getElementById('authStatus');
+    const authFeedback = document.getElementById('authFeedback');
+    const logoutButton = document.getElementById('logoutButton');
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const showLoginButton = document.getElementById('showLoginButton');
+    const showRegisterButton = document.getElementById('showRegisterButton');
+
+    function setAuthMode(mode) {
+      const loginMode = mode === 'login';
+      loginForm.hidden = !loginMode;
+      registerForm.hidden = loginMode;
+      showLoginButton.classList.toggle('active', loginMode);
+      showRegisterButton.classList.toggle('active', !loginMode);
+      authFeedback.textContent = '';
+    }
+
+    function describeUser(user) {
+      if (!user) return 'Chua dang nhap';
+      if (user.isAnonymous) return 'Dang choi bang tai khoan khach';
+      return `Da dang nhap: ${user.email}`;
+    }
+
+    function normalizeAuthError(error) {
+      if (!error || !error.code) {
+        return 'Co loi xay ra. Vui long thu lai.';
+      }
+
+      const messages = {
+        'auth/email-already-in-use': 'Email nay da duoc dang ky.',
+        'auth/invalid-email': 'Email khong hop le.',
+        'auth/user-not-found': 'Khong tim thay tai khoan nay.',
+        'auth/wrong-password': 'Mat khau chua dung.',
+        'auth/invalid-credential': 'Email hoac mat khau chua dung.',
+        'auth/weak-password': 'Mat khau can it nhat 6 ky tu.',
+        'auth/too-many-requests': 'Thu qua nhieu lan. Vui long doi mot chut.'
+      };
+
+      return messages[error.code] || 'Khong the xu ly yeu cau dang nhap.';
+    }
 
     levels.forEach(level => {
       level.addEventListener('click', () => {
@@ -1033,6 +1222,67 @@
 
         previewTitle.textContent = level.dataset.title;
         previewDesc.textContent = level.dataset.desc;
+      });
+    });
+
+    showLoginButton.addEventListener('click', () => setAuthMode('login'));
+    showRegisterButton.addEventListener('click', () => setAuthMode('register'));
+
+    Promise.resolve(window.FYDFirebase && window.FYDFirebase.ready).then(async (client) => {
+      if (!client || !client.enabled) {
+        authStatus.textContent = 'Firebase chua san sang cho dang nhap.';
+        authFeedback.textContent = 'Can kiem tra Firebase config de bat dang nhap.';
+        return;
+      }
+
+      const renderUser = (user) => {
+        authStatus.textContent = describeUser(user);
+        logoutButton.hidden = !user || user.isAnonymous;
+      };
+
+      renderUser(client.getCurrentUser());
+      client.onAuthChange((user) => {
+        renderUser(user);
+      });
+
+      loginForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const formData = new FormData(loginForm);
+        authFeedback.textContent = 'Dang dang nhap...';
+
+        try {
+          await client.loginWithEmail(formData.get('email'), formData.get('password'));
+          authFeedback.textContent = 'Dang nhap thanh cong.';
+          loginForm.reset();
+        } catch (error) {
+          authFeedback.textContent = normalizeAuthError(error);
+        }
+      });
+
+      registerForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const formData = new FormData(registerForm);
+        authFeedback.textContent = 'Dang tao tai khoan...';
+
+        try {
+          await client.registerWithEmail(formData.get('email'), formData.get('password'));
+          authFeedback.textContent = 'Dang ky thanh cong. Ban da duoc dang nhap.';
+          registerForm.reset();
+          setAuthMode('login');
+        } catch (error) {
+          authFeedback.textContent = normalizeAuthError(error);
+        }
+      });
+
+      logoutButton.addEventListener('click', async () => {
+        authFeedback.textContent = 'Dang dang xuat...';
+
+        try {
+          await client.logout();
+          authFeedback.textContent = 'Da dang xuat. He thong da quay ve tai khoan khach.';
+        } catch (error) {
+          authFeedback.textContent = normalizeAuthError(error);
+        }
       });
     });
   </script>
